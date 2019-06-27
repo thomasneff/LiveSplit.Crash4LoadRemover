@@ -1,5 +1,16 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <updates>
+  <update version="1.1">
+    <files>
+      <file path="Components/LiveSplit.CTRNitroFueledLoadRemover.dll" status="changed" />
+      <file path="Components/LiveSplit.CTRNitroFueledLoadRemover.data" status="changed" />
+    </files>
+    <changelog>
+      <change>
+        Initial (working!) version of the CTR Load Remover. Needs more stability/robustness testing and potentially white screen removal.
+      </change>
+    </changelog>
+  </update>
   <update version="1.0">
     <files>
       <file path="Components/LiveSplit.CTRNitroFueledLoadRemover.dll" status="changed" />

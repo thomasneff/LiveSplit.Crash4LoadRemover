@@ -46,6 +46,7 @@
       this.updatePreviewButton = new System.Windows.Forms.Button();
       this.tabControl1 = new System.Windows.Forms.TabControl();
       this.tabPage1 = new System.Windows.Forms.TabPage();
+      this.lblBlackLevel = new System.Windows.Forms.Label();
       this.chkRemoveFadeIns = new System.Windows.Forms.CheckBox();
       this.chkSaveDetectionLog = new System.Windows.Forms.CheckBox();
       this.chkRemoveTransitions = new System.Windows.Forms.CheckBox();
@@ -56,7 +57,15 @@
       this.autoSplitNameLbl = new System.Windows.Forms.Label();
       this.autoSplitCategoryLbl = new System.Windows.Forms.Label();
       this.enableAutoSplitterChk = new System.Windows.Forms.CheckBox();
-      this.lblBlackLevel = new System.Windows.Forms.Label();
+      this.tabPage3 = new System.Windows.Forms.TabPage();
+      this.devToolsRecord = new System.Windows.Forms.CheckBox();
+      this.label9 = new System.Windows.Forms.Label();
+      this.devToolsCropY = new System.Windows.Forms.NumericUpDown();
+      this.label8 = new System.Windows.Forms.Label();
+      this.devToolsCropX = new System.Windows.Forms.NumericUpDown();
+      this.label7 = new System.Windows.Forms.Label();
+      this.devToolsCroppedPictureBox = new System.Windows.Forms.PictureBox();
+      this.devToolsDatabaseButton = new System.Windows.Forms.Button();
       ((System.ComponentModel.ISupportInitialize)(this.previewPictureBox)).BeginInit();
       ((System.ComponentModel.ISupportInitialize)(this.croppedPreviewPictureBox)).BeginInit();
       ((System.ComponentModel.ISupportInitialize)(this.trackBar1)).BeginInit();
@@ -65,6 +74,10 @@
       this.tabControl1.SuspendLayout();
       this.tabPage1.SuspendLayout();
       this.tabPage2.SuspendLayout();
+      this.tabPage3.SuspendLayout();
+      ((System.ComponentModel.ISupportInitialize)(this.devToolsCropY)).BeginInit();
+      ((System.ComponentModel.ISupportInitialize)(this.devToolsCropX)).BeginInit();
+      ((System.ComponentModel.ISupportInitialize)(this.devToolsCroppedPictureBox)).BeginInit();
       this.SuspendLayout();
       // 
       // lblVersion
@@ -265,6 +278,7 @@
       // 
       this.tabControl1.Controls.Add(this.tabPage1);
       this.tabControl1.Controls.Add(this.tabPage2);
+      this.tabControl1.Controls.Add(this.tabPage3);
       this.tabControl1.Location = new System.Drawing.Point(0, 0);
       this.tabControl1.Name = "tabControl1";
       this.tabControl1.SelectedIndex = 0;
@@ -293,6 +307,15 @@
       this.tabPage1.Size = new System.Drawing.Size(468, 506);
       this.tabPage1.TabIndex = 0;
       this.tabPage1.Text = "Setup";
+      // 
+      // lblBlackLevel
+      // 
+      this.lblBlackLevel.AutoSize = true;
+      this.lblBlackLevel.Location = new System.Drawing.Point(377, 90);
+      this.lblBlackLevel.Name = "lblBlackLevel";
+      this.lblBlackLevel.Size = new System.Drawing.Size(78, 13);
+      this.lblBlackLevel.TabIndex = 41;
+      this.lblBlackLevel.Text = "Black-Level: -1";
       // 
       // chkRemoveFadeIns
       // 
@@ -417,14 +440,129 @@
       this.enableAutoSplitterChk.UseVisualStyleBackColor = true;
       this.enableAutoSplitterChk.CheckedChanged += new System.EventHandler(this.enableAutoSplitterChk_CheckedChanged);
       // 
-      // lblBlackLevel
+      // tabPage3
       // 
-      this.lblBlackLevel.AutoSize = true;
-      this.lblBlackLevel.Location = new System.Drawing.Point(377, 90);
-      this.lblBlackLevel.Name = "lblBlackLevel";
-      this.lblBlackLevel.Size = new System.Drawing.Size(78, 13);
-      this.lblBlackLevel.TabIndex = 41;
-      this.lblBlackLevel.Text = "Black-Level: -1";
+      this.tabPage3.BackColor = System.Drawing.SystemColors.Control;
+      this.tabPage3.Controls.Add(this.devToolsDatabaseButton);
+      this.tabPage3.Controls.Add(this.devToolsRecord);
+      this.tabPage3.Controls.Add(this.label9);
+      this.tabPage3.Controls.Add(this.devToolsCropY);
+      this.tabPage3.Controls.Add(this.label8);
+      this.tabPage3.Controls.Add(this.devToolsCropX);
+      this.tabPage3.Controls.Add(this.label7);
+      this.tabPage3.Controls.Add(this.devToolsCroppedPictureBox);
+      this.tabPage3.Location = new System.Drawing.Point(4, 22);
+      this.tabPage3.Name = "tabPage3";
+      this.tabPage3.Size = new System.Drawing.Size(468, 506);
+      this.tabPage3.TabIndex = 2;
+      this.tabPage3.Text = "Developer Tools (caution!)";
+      // 
+      // devToolsRecord
+      // 
+      this.devToolsRecord.AutoSize = true;
+      this.devToolsRecord.Location = new System.Drawing.Point(112, 359);
+      this.devToolsRecord.Name = "devToolsRecord";
+      this.devToolsRecord.Size = new System.Drawing.Size(98, 17);
+      this.devToolsRecord.TabIndex = 41;
+      this.devToolsRecord.Text = "Record Images";
+      this.devToolsRecord.UseVisualStyleBackColor = true;
+      this.devToolsRecord.CheckedChanged += new System.EventHandler(this.devToolsRecord_CheckedChanged);
+      // 
+      // label9
+      // 
+      this.label9.AutoSize = true;
+      this.label9.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+      this.label9.Location = new System.Drawing.Point(57, 340);
+      this.label9.Name = "label9";
+      this.label9.Size = new System.Drawing.Size(49, 16);
+      this.label9.TabIndex = 39;
+      this.label9.Text = "Crop Y";
+      // 
+      // devToolsCropY
+      // 
+      this.devToolsCropY.Location = new System.Drawing.Point(60, 359);
+      this.devToolsCropY.Maximum = new decimal(new int[] {
+            2000,
+            0,
+            0,
+            0});
+      this.devToolsCropY.Minimum = new decimal(new int[] {
+            2000,
+            0,
+            0,
+            -2147483648});
+      this.devToolsCropY.Name = "devToolsCropY";
+      this.devToolsCropY.Size = new System.Drawing.Size(42, 20);
+      this.devToolsCropY.TabIndex = 40;
+      this.devToolsCropY.Value = new decimal(new int[] {
+            434,
+            0,
+            0,
+            0});
+      this.devToolsCropY.ValueChanged += new System.EventHandler(this.devToolsCropY_ValueChanged);
+      // 
+      // label8
+      // 
+      this.label8.AutoSize = true;
+      this.label8.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+      this.label8.Location = new System.Drawing.Point(3, 340);
+      this.label8.Name = "label8";
+      this.label8.Size = new System.Drawing.Size(48, 16);
+      this.label8.TabIndex = 37;
+      this.label8.Text = "Crop X";
+      // 
+      // devToolsCropX
+      // 
+      this.devToolsCropX.Location = new System.Drawing.Point(6, 359);
+      this.devToolsCropX.Maximum = new decimal(new int[] {
+            2000,
+            0,
+            0,
+            0});
+      this.devToolsCropX.Minimum = new decimal(new int[] {
+            2000,
+            0,
+            0,
+            -2147483648});
+      this.devToolsCropX.Name = "devToolsCropX";
+      this.devToolsCropX.Size = new System.Drawing.Size(42, 20);
+      this.devToolsCropX.TabIndex = 38;
+      this.devToolsCropX.Value = new decimal(new int[] {
+            590,
+            0,
+            0,
+            0});
+      this.devToolsCropX.ValueChanged += new System.EventHandler(this.devToolsCropX_ValueChanged);
+      // 
+      // label7
+      // 
+      this.label7.AutoSize = true;
+      this.label7.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+      this.label7.Location = new System.Drawing.Point(2, 382);
+      this.label7.Name = "label7";
+      this.label7.Size = new System.Drawing.Size(185, 16);
+      this.label7.TabIndex = 32;
+      this.label7.Text = "Cropped Capture Preview";
+      this.label7.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+      // 
+      // devToolsCroppedPictureBox
+      // 
+      this.devToolsCroppedPictureBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+      this.devToolsCroppedPictureBox.Location = new System.Drawing.Point(6, 400);
+      this.devToolsCroppedPictureBox.Name = "devToolsCroppedPictureBox";
+      this.devToolsCroppedPictureBox.Size = new System.Drawing.Size(300, 100);
+      this.devToolsCroppedPictureBox.TabIndex = 31;
+      this.devToolsCroppedPictureBox.TabStop = false;
+      // 
+      // devToolsDatabaseButton
+      // 
+      this.devToolsDatabaseButton.Location = new System.Drawing.Point(308, 464);
+      this.devToolsDatabaseButton.Name = "devToolsDatabaseButton";
+      this.devToolsDatabaseButton.Size = new System.Drawing.Size(158, 36);
+      this.devToolsDatabaseButton.TabIndex = 42;
+      this.devToolsDatabaseButton.Text = "Compute Database";
+      this.devToolsDatabaseButton.UseVisualStyleBackColor = true;
+      this.devToolsDatabaseButton.Click += new System.EventHandler(this.devToolsDatabaseButton_Click);
       // 
       // CTRNitroFueledLoadRemoverSettings
       // 
@@ -445,6 +583,11 @@
       this.tabPage1.PerformLayout();
       this.tabPage2.ResumeLayout(false);
       this.tabPage2.PerformLayout();
+      this.tabPage3.ResumeLayout(false);
+      this.tabPage3.PerformLayout();
+      ((System.ComponentModel.ISupportInitialize)(this.devToolsCropY)).EndInit();
+      ((System.ComponentModel.ISupportInitialize)(this.devToolsCropX)).EndInit();
+      ((System.ComponentModel.ISupportInitialize)(this.devToolsCroppedPictureBox)).EndInit();
       this.ResumeLayout(false);
 
 		}
@@ -479,5 +622,14 @@
     private System.Windows.Forms.CheckBox chkSaveDetectionLog;
     private System.Windows.Forms.CheckBox chkRemoveFadeIns;
     private System.Windows.Forms.Label lblBlackLevel;
+    private System.Windows.Forms.TabPage tabPage3;
+    private System.Windows.Forms.Label label7;
+    private System.Windows.Forms.PictureBox devToolsCroppedPictureBox;
+    private System.Windows.Forms.Label label8;
+    private System.Windows.Forms.Label label9;
+    private System.Windows.Forms.NumericUpDown devToolsCropY;
+    private System.Windows.Forms.NumericUpDown devToolsCropX;
+    private System.Windows.Forms.CheckBox devToolsRecord;
+    private System.Windows.Forms.Button devToolsDatabaseButton;
   }
 }

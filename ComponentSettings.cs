@@ -8,6 +8,8 @@ using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Reflection;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Windows.Forms;
 using System.Xml;
@@ -28,6 +30,8 @@ namespace LiveSplit.UI.Components
     public bool RemoveFadeins = false;
 
     public bool SaveDetectionLog = false;
+
+    public bool RecordImages = false;
 
     public int AverageBlackLevel = -1;
 
@@ -54,9 +58,9 @@ namespace LiveSplit.UI.Components
 
 		private Size captureSize = new Size(300, 100);
 
-		private float cropOffsetX = 0.0f;
+		private float cropOffsetX = 590.0f;
 
-		private float cropOffsetY = -40.0f;
+		private float cropOffsetY = 434.0f;
 
 		private bool drawingPreview = false;
 
@@ -100,16 +104,52 @@ namespace LiveSplit.UI.Components
 		private Rectangle selectionRectanglePreviewBox;
 		private Point selectionTopLeft = new Point(0, 0);
 
-		#endregion Private Fields
+    #endregion Private Fields
 
-		#region Public Constructors
+    #region Public Constructors
 
-		public CTRNitroFueledLoadRemoverSettings(LiveSplitState state)
+    private string LoadRemoverDataName = "Components/LiveSplit.CTRNitroFueledLoadRemover.data";
+
+    public class Binder : System.Runtime.Serialization.SerializationBinder
+    {
+      public override Type BindToType(string assemblyName, string typeName)
+      {
+        Assembly ass = Assembly.Load(assemblyName);
+        return ass.GetType(typeName);
+      }
+    }
+
+    private void DeserializeAndUpdateDetectorData()
+    {
+      DetectorData data = DeserializeDetectorData(LoadRemoverDataName);
+      captureSize = new Size(data.sizeX, data.sizeY);
+      FeatureDetector.numberOfBins = data.numberOfHistogramBins;
+      FeatureDetector.patchSizeX = captureSize.Width / data.numPatchesX;
+      FeatureDetector.patchSizeY = captureSize.Height / data.numPatchesY;
+      int[][] features_temp = data.features.ToArray();
+
+      int len_x = features_temp.Length;
+      int len_y = features_temp[0].Length;
+
+      FeatureDetector.listOfFeatureVectorsEng = new int[len_x, len_y];
+
+      for(int x = 0; x < len_x; x++)
+      {
+        for (int y = 0; y < len_y; y++)
+        {
+          FeatureDetector.listOfFeatureVectorsEng[x, y] = features_temp[x][y];
+        }
+      }
+
+    }
+
+    public CTRNitroFueledLoadRemoverSettings(LiveSplitState state)
 		{
 			InitializeComponent();
 
       //RemoveFadeins = chkRemoveFadeIns.Checked;
-      
+      DeserializeAndUpdateDetectorData();
+
       RemoveFadeouts = chkRemoveTransitions.Checked;
       RemoveFadeins = chkRemoveTransitions.Checked;
       SaveDetectionLog = chkSaveDetectionLog.Checked;
@@ -126,7 +166,9 @@ namespace LiveSplit.UI.Components
 			RefreshCaptureWindowList();
 			//processListComboBox.SelectedIndex = 0;
 			DrawPreview();
-		}
+
+
+    }
 
 		#endregion Public Constructors
 
@@ -576,7 +618,10 @@ namespace LiveSplit.UI.Components
 				}
 
 				DrawPreview();
-			}
+
+        CaptureImageFullPreview(ref imageCaptureInfo, true);
+        devToolsCroppedPictureBox.Image = CaptureImage();
+      }
 		}
 
 		#endregion Public Methods
@@ -1040,7 +1085,120 @@ namespace LiveSplit.UI.Components
       //RemoveFadeins = chkRemoveFadeIns.Checked;
       RemoveFadeins = chkRemoveTransitions.Checked;
     }
+
+    private void devToolsCropX_ValueChanged(object sender, EventArgs e)
+    {
+      cropOffsetX = Convert.ToSingle(devToolsCropX.Value);
+      imageCaptureInfo.cropOffsetX = cropOffsetX;
+      CaptureImageFullPreview(ref imageCaptureInfo, true);
+      devToolsCroppedPictureBox.Image = CaptureImage();
+    }
+
+    private void devToolsCropY_ValueChanged(object sender, EventArgs e)
+    {
+      cropOffsetY = Convert.ToSingle(devToolsCropY.Value);
+      imageCaptureInfo.cropOffsetY = cropOffsetY;
+      CaptureImageFullPreview(ref imageCaptureInfo, true);
+      devToolsCroppedPictureBox.Image = CaptureImage();
+    }
+
+    private void devToolsRecord_CheckedChanged(object sender, EventArgs e)
+    {
+      RecordImages = devToolsRecord.Checked;
+    }
+
+    private void devToolsDatabaseButton_Click(object sender, EventArgs e)
+    {
+      using (var fbd = new System.Windows.Forms.FolderBrowserDialog())
+      {
+        DialogResult result = fbd.ShowDialog();
+
+        if (result != DialogResult.OK)
+        {
+          return;
+        }
+
+        DetectorData data = new DetectorData();
+        data.sizeX = captureSize.Width;
+        data.sizeY = captureSize.Height;
+        data.numberOfHistogramBins = 16;
+        data.numPatchesX = 6;
+        data.numPatchesY = 2;
+        data.offsetX = Convert.ToInt32(cropOffsetX);
+        data.offsetY = Convert.ToInt32(cropOffsetY);
+        data.features = new List<int[]>();
+
+        var files = System.IO.Directory.GetFiles(fbd.SelectedPath);
+
+        foreach(string filename in files)
+        {
+          Bitmap bmp = new Bitmap(filename);
+
+          //Make 32 bit ARGB bitmap
+          Bitmap clone = new Bitmap(bmp.Width, bmp.Height,
+            System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+
+          using (Graphics gr = Graphics.FromImage(clone))
+          {
+            gr.DrawImage(bmp, new Rectangle(0, 0, clone.Width, clone.Height));
+          }
+
+          int black_level = 0;
+          List<int> max_per_patch = new List<int>();
+          data.features.Add(FeatureDetector.featuresFromBitmap(clone, out max_per_patch, out black_level).ToArray());
+
+
+          
+
+          bmp.Dispose();
+          clone.Dispose();
+        }
+
+        SerializeDetectorData(data);
+        
+      }
+      
+
+     
+    }
+
+    void SerializeDetectorData(DetectorData data)
+    {
+      IFormatter formatter = new BinaryFormatter();
+      System.IO.Directory.CreateDirectory(Path.Combine(DetectionLogFolderName, "SerializedData"));
+      Stream stream = new FileStream(Path.Combine(DetectionLogFolderName, "SerializedData", DateTime.Now.ToString("yyyy_MM_dd_HH_mm_ss_fff") + ".data"), FileMode.Create, FileAccess.Write);
+
+      formatter.Serialize(stream, data);
+      stream.Close();
+    }
+
+    DetectorData DeserializeDetectorData(string path)
+    {
+      IFormatter formatter = new BinaryFormatter();
+      Stream stream = new FileStream(path, FileMode.Open, FileAccess.Read);
+      formatter.Binder = new Binder();
+      DetectorData data = (DetectorData)formatter.Deserialize(stream);
+      stream.Close();
+      return data;
+    }
+
   }
+
+  [Serializable]
+  public class DetectorData
+  {
+    public int offsetX;
+    public int offsetY;
+    public int sizeX;
+    public int sizeY;
+    public int numPatchesX;
+    public int numPatchesY;
+    public int numberOfHistogramBins;
+
+    public List<int[]> features;
+  }
+
+
   public class AutoSplitData
 	{
 		#region Public Fields

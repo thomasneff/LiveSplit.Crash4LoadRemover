@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using CrashNSaneLoadDetector;
 using System.IO;
+using System.Drawing.Imaging;
 //using System.Threading;
 
 namespace LiveSplit.UI.Components
@@ -21,7 +22,7 @@ namespace LiveSplit.UI.Components
     public float PaddingTop { get { return 0; } }
     public float PaddingLeft { get { return 0; } }
     public float PaddingRight { get { return 0; } }
-
+    public int frame_count = 0;
     public bool Refresh { get; set; }
 
     public IDictionary<string, Action> ContextMenuControls { get; protected set; }
@@ -539,7 +540,7 @@ namespace LiveSplit.UI.Components
 
       System.IO.Directory.CreateDirectory(settings.DetectionLogFolderName);
 
-      string fileName = Path.Combine(settings.DetectionLogFolderName + "/", "CTRNitroFueledLoadRemover_Log_" + DateTime.Now.ToString("yyyy_MM_dd_HH_mm_ss_") + settings.removeInvalidXMLCharacters(GameName) + "_" + settings.removeInvalidXMLCharacters(GameCategory) + ".txt");
+      string fileName = Path.Combine(settings.DetectionLogFolderName, "CTRNitroFueledLoadRemover_Log_" + DateTime.Now.ToString("yyyy_MM_dd_HH_mm_ss_") + settings.removeInvalidXMLCharacters(GameName) + "_" + settings.removeInvalidXMLCharacters(GameCategory) + ".txt");
 
       if (log_file_writer != null)
       {
@@ -602,6 +603,28 @@ namespace LiveSplit.UI.Components
     }
     public void Update(IInvalidator invalidator, LiveSplitState state, float width, float height, LayoutMode mode)
     {
+      frame_count++;
+      if (settings.RecordImages && (frame_count % 3) == 0)
+      {
+        System.IO.Directory.CreateDirectory(Path.Combine(settings.DetectionLogFolderName, "CaptureImages"));
+        string fileName = Path.Combine(settings.DetectionLogFolderName, "CaptureImages", "CTRNitroFueledLoadRemover_Log_" + DateTime.Now.ToString("yyyy_MM_dd_HH_mm_ss_fff") + settings.removeInvalidXMLCharacters(GameName) + "_" + settings.removeInvalidXMLCharacters(GameCategory) + ".png");
+
+
+        using (MemoryStream memory = new MemoryStream())
+        {
+          using (FileStream fs = new FileStream(fileName, FileMode.Create, FileAccess.ReadWrite))
+          {
+            Bitmap capture = settings.CaptureImage();
+            capture.Save(memory, ImageFormat.Png);
+            byte[] bytes = memory.ToArray();
+            fs.Write(bytes, 0, bytes.Length);
+          }
+        }
+
+      }
+
+
+
       if (SplitsAreDifferent(state))
       {
         settings.ChangeAutoSplitSettingsToGameName(GameName, GameCategory);
