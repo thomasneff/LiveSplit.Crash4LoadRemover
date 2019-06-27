@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<updates>
+  <update version="1.0">
+    <files>
+      <file path="Components/LiveSplit.CTRNitroFueledLoadRemover.dll" status="changed" />
+      <file path="Components/LiveSplit.CTRNitroFueledLoadRemover.data" status="changed" />
+    </files>
+    <changelog>
+      <change>
+        Initial version of the CTR Nitro Fueled load remover. This does not work and is just a copy of the Crash NST load remover currently.
+      </change>
+    </changelog>
+  </update>
+</updates>
