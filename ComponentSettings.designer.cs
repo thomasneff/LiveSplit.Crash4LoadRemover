@@ -58,6 +58,10 @@
       this.autoSplitCategoryLbl = new System.Windows.Forms.Label();
       this.enableAutoSplitterChk = new System.Windows.Forms.CheckBox();
       this.tabPage3 = new System.Windows.Forms.TabPage();
+      this.devToolsDataBaseFromCaptureImages = new System.Windows.Forms.Button();
+      this.label10 = new System.Windows.Forms.Label();
+      this.devToolsCaptureImageText = new System.Windows.Forms.TextBox();
+      this.devToolsDatabaseButton = new System.Windows.Forms.Button();
       this.devToolsRecord = new System.Windows.Forms.CheckBox();
       this.label9 = new System.Windows.Forms.Label();
       this.devToolsCropY = new System.Windows.Forms.NumericUpDown();
@@ -65,7 +69,8 @@
       this.devToolsCropX = new System.Windows.Forms.NumericUpDown();
       this.label7 = new System.Windows.Forms.Label();
       this.devToolsCroppedPictureBox = new System.Windows.Forms.PictureBox();
-      this.devToolsDatabaseButton = new System.Windows.Forms.Button();
+      this.label12 = new System.Windows.Forms.Label();
+      this.cmbDatabase = new System.Windows.Forms.ComboBox();
       ((System.ComponentModel.ISupportInitialize)(this.previewPictureBox)).BeginInit();
       ((System.ComponentModel.ISupportInitialize)(this.croppedPreviewPictureBox)).BeginInit();
       ((System.ComponentModel.ISupportInitialize)(this.trackBar1)).BeginInit();
@@ -118,7 +123,7 @@
       // previewPictureBox
       // 
       this.previewPictureBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-      this.previewPictureBox.Location = new System.Drawing.Point(31, 122);
+      this.previewPictureBox.Location = new System.Drawing.Point(30, 163);
       this.previewPictureBox.Name = "previewPictureBox";
       this.previewPictureBox.Size = new System.Drawing.Size(400, 180);
       this.previewPictureBox.TabIndex = 24;
@@ -132,7 +137,7 @@
       // 
       this.label2.AutoSize = true;
       this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.label2.Location = new System.Drawing.Point(27, 88);
+      this.label2.Location = new System.Drawing.Point(26, 129);
       this.label2.Name = "label2";
       this.label2.Size = new System.Drawing.Size(121, 16);
       this.label2.TabIndex = 25;
@@ -143,7 +148,7 @@
       // 
       this.label11.AutoSize = true;
       this.label11.Font = new System.Drawing.Font("Microsoft Sans Serif", 6.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.label11.Location = new System.Drawing.Point(28, 107);
+      this.label11.Location = new System.Drawing.Point(27, 148);
       this.label11.Name = "label11";
       this.label11.Size = new System.Drawing.Size(304, 12);
       this.label11.TabIndex = 28;
@@ -153,7 +158,7 @@
       // 
       this.label4.AutoSize = true;
       this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.label4.Location = new System.Drawing.Point(27, 305);
+      this.label4.Location = new System.Drawing.Point(27, 346);
       this.label4.Name = "label4";
       this.label4.Size = new System.Drawing.Size(185, 16);
       this.label4.TabIndex = 30;
@@ -163,9 +168,9 @@
       // croppedPreviewPictureBox
       // 
       this.croppedPreviewPictureBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-      this.croppedPreviewPictureBox.Location = new System.Drawing.Point(31, 323);
+      this.croppedPreviewPictureBox.Location = new System.Drawing.Point(30, 365);
       this.croppedPreviewPictureBox.Name = "croppedPreviewPictureBox";
-      this.croppedPreviewPictureBox.Size = new System.Drawing.Size(400, 180);
+      this.croppedPreviewPictureBox.Size = new System.Drawing.Size(300, 135);
       this.croppedPreviewPictureBox.TabIndex = 29;
       this.croppedPreviewPictureBox.TabStop = false;
       // 
@@ -247,7 +252,7 @@
       this.panel1.Controls.Add(this.scalingLabel);
       this.panel1.Controls.Add(this.matchDisplayLabel);
       this.panel1.Controls.Add(this.trackBar1);
-      this.panel1.Location = new System.Drawing.Point(31, 33);
+      this.panel1.Location = new System.Drawing.Point(29, 72);
       this.panel1.Name = "panel1";
       this.panel1.Size = new System.Drawing.Size(400, 52);
       this.panel1.TabIndex = 37;
@@ -288,6 +293,8 @@
       // tabPage1
       // 
       this.tabPage1.BackColor = System.Drawing.SystemColors.Control;
+      this.tabPage1.Controls.Add(this.label12);
+      this.tabPage1.Controls.Add(this.cmbDatabase);
       this.tabPage1.Controls.Add(this.lblBlackLevel);
       this.tabPage1.Controls.Add(this.chkRemoveFadeIns);
       this.tabPage1.Controls.Add(this.chkSaveDetectionLog);
@@ -311,18 +318,19 @@
       // lblBlackLevel
       // 
       this.lblBlackLevel.AutoSize = true;
-      this.lblBlackLevel.Location = new System.Drawing.Point(377, 90);
+      this.lblBlackLevel.Location = new System.Drawing.Point(376, 131);
       this.lblBlackLevel.Name = "lblBlackLevel";
       this.lblBlackLevel.Size = new System.Drawing.Size(78, 13);
       this.lblBlackLevel.TabIndex = 41;
       this.lblBlackLevel.Text = "Black-Level: -1";
+      this.lblBlackLevel.Visible = false;
       // 
       // chkRemoveFadeIns
       // 
       this.chkRemoveFadeIns.AutoSize = true;
       this.chkRemoveFadeIns.Checked = true;
       this.chkRemoveFadeIns.CheckState = System.Windows.Forms.CheckState.Checked;
-      this.chkRemoveFadeIns.Location = new System.Drawing.Point(347, 104);
+      this.chkRemoveFadeIns.Location = new System.Drawing.Point(346, 145);
       this.chkRemoveFadeIns.Name = "chkRemoveFadeIns";
       this.chkRemoveFadeIns.Size = new System.Drawing.Size(109, 17);
       this.chkRemoveFadeIns.TabIndex = 40;
@@ -336,7 +344,7 @@
       this.chkSaveDetectionLog.AutoSize = true;
       this.chkSaveDetectionLog.Checked = true;
       this.chkSaveDetectionLog.CheckState = System.Windows.Forms.CheckState.Checked;
-      this.chkSaveDetectionLog.Location = new System.Drawing.Point(152, 89);
+      this.chkSaveDetectionLog.Location = new System.Drawing.Point(151, 130);
       this.chkSaveDetectionLog.Name = "chkSaveDetectionLog";
       this.chkSaveDetectionLog.Size = new System.Drawing.Size(93, 17);
       this.chkSaveDetectionLog.TabIndex = 39;
@@ -349,7 +357,7 @@
       this.chkRemoveTransitions.AutoSize = true;
       this.chkRemoveTransitions.Checked = true;
       this.chkRemoveTransitions.CheckState = System.Windows.Forms.CheckState.Checked;
-      this.chkRemoveTransitions.Location = new System.Drawing.Point(251, 89);
+      this.chkRemoveTransitions.Location = new System.Drawing.Point(250, 130);
       this.chkRemoveTransitions.Name = "chkRemoveTransitions";
       this.chkRemoveTransitions.Size = new System.Drawing.Size(120, 17);
       this.chkRemoveTransitions.TabIndex = 38;
@@ -443,6 +451,9 @@
       // tabPage3
       // 
       this.tabPage3.BackColor = System.Drawing.SystemColors.Control;
+      this.tabPage3.Controls.Add(this.devToolsDataBaseFromCaptureImages);
+      this.tabPage3.Controls.Add(this.label10);
+      this.tabPage3.Controls.Add(this.devToolsCaptureImageText);
       this.tabPage3.Controls.Add(this.devToolsDatabaseButton);
       this.tabPage3.Controls.Add(this.devToolsRecord);
       this.tabPage3.Controls.Add(this.label9);
@@ -456,6 +467,44 @@
       this.tabPage3.Size = new System.Drawing.Size(468, 506);
       this.tabPage3.TabIndex = 2;
       this.tabPage3.Text = "Developer Tools (caution!)";
+      // 
+      // devToolsDataBaseFromCaptureImages
+      // 
+      this.devToolsDataBaseFromCaptureImages.Location = new System.Drawing.Point(154, 269);
+      this.devToolsDataBaseFromCaptureImages.Name = "devToolsDataBaseFromCaptureImages";
+      this.devToolsDataBaseFromCaptureImages.Size = new System.Drawing.Size(158, 36);
+      this.devToolsDataBaseFromCaptureImages.TabIndex = 45;
+      this.devToolsDataBaseFromCaptureImages.Text = "Compute Database";
+      this.devToolsDataBaseFromCaptureImages.UseVisualStyleBackColor = true;
+      this.devToolsDataBaseFromCaptureImages.Click += new System.EventHandler(this.devToolsDataBaseFromCaptureImages_Click);
+      // 
+      // label10
+      // 
+      this.label10.AutoSize = true;
+      this.label10.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+      this.label10.Location = new System.Drawing.Point(6, 259);
+      this.label10.Name = "label10";
+      this.label10.Size = new System.Drawing.Size(142, 16);
+      this.label10.TabIndex = 44;
+      this.label10.Text = "CaptureImages Folder";
+      // 
+      // devToolsCaptureImageText
+      // 
+      this.devToolsCaptureImageText.Location = new System.Drawing.Point(7, 278);
+      this.devToolsCaptureImageText.Name = "devToolsCaptureImageText";
+      this.devToolsCaptureImageText.Size = new System.Drawing.Size(141, 20);
+      this.devToolsCaptureImageText.TabIndex = 43;
+      this.devToolsCaptureImageText.Text = "CaptureImages";
+      // 
+      // devToolsDatabaseButton
+      // 
+      this.devToolsDatabaseButton.Location = new System.Drawing.Point(308, 464);
+      this.devToolsDatabaseButton.Name = "devToolsDatabaseButton";
+      this.devToolsDatabaseButton.Size = new System.Drawing.Size(158, 36);
+      this.devToolsDatabaseButton.TabIndex = 42;
+      this.devToolsDatabaseButton.Text = "Compute Database";
+      this.devToolsDatabaseButton.UseVisualStyleBackColor = true;
+      this.devToolsDatabaseButton.Click += new System.EventHandler(this.devToolsDatabaseButton_Click);
       // 
       // devToolsRecord
       // 
@@ -554,15 +603,26 @@
       this.devToolsCroppedPictureBox.TabIndex = 31;
       this.devToolsCroppedPictureBox.TabStop = false;
       // 
-      // devToolsDatabaseButton
+      // label12
       // 
-      this.devToolsDatabaseButton.Location = new System.Drawing.Point(308, 464);
-      this.devToolsDatabaseButton.Name = "devToolsDatabaseButton";
-      this.devToolsDatabaseButton.Size = new System.Drawing.Size(158, 36);
-      this.devToolsDatabaseButton.TabIndex = 42;
-      this.devToolsDatabaseButton.Text = "Compute Database";
-      this.devToolsDatabaseButton.UseVisualStyleBackColor = true;
-      this.devToolsDatabaseButton.Click += new System.EventHandler(this.devToolsDatabaseButton_Click);
+      this.label12.AutoSize = true;
+      this.label12.Location = new System.Drawing.Point(28, 48);
+      this.label12.Name = "label12";
+      this.label12.Size = new System.Drawing.Size(56, 13);
+      this.label12.TabIndex = 43;
+      this.label12.Text = "Database:";
+      // 
+      // cmbDatabase
+      // 
+      this.cmbDatabase.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+      this.cmbDatabase.FormattingEnabled = true;
+      this.cmbDatabase.Items.AddRange(new object[] {
+            "Full Display (Primary)"});
+      this.cmbDatabase.Location = new System.Drawing.Point(86, 45);
+      this.cmbDatabase.Name = "cmbDatabase";
+      this.cmbDatabase.Size = new System.Drawing.Size(345, 21);
+      this.cmbDatabase.TabIndex = 42;
+      this.cmbDatabase.SelectedIndexChanged += new System.EventHandler(this.cmbDatabase_SelectedIndexChanged);
       // 
       // CTRNitroFueledLoadRemoverSettings
       // 
@@ -631,5 +691,10 @@
     private System.Windows.Forms.NumericUpDown devToolsCropX;
     private System.Windows.Forms.CheckBox devToolsRecord;
     private System.Windows.Forms.Button devToolsDatabaseButton;
+    private System.Windows.Forms.Label label10;
+    private System.Windows.Forms.TextBox devToolsCaptureImageText;
+    private System.Windows.Forms.Button devToolsDataBaseFromCaptureImages;
+    private System.Windows.Forms.Label label12;
+    private System.Windows.Forms.ComboBox cmbDatabase;
   }
 }

@@ -32,7 +32,7 @@ namespace LiveSplit.UI.Components
     private bool isLoading = false;
     private bool isTransition = false;
     private int matchingBins = 0;
-    private float numSecondsTransitionMax = 5.0f; // A transition can at most be 5 seconds long, otherwise it is not counted
+    private float numSecondsTransitionMax = 10.0f; // A transition can at most be 5 seconds long, otherwise it is not counted
 
     private TimerModel timer;
     private bool timerStarted = false;
@@ -56,12 +56,6 @@ namespace LiveSplit.UI.Components
     private string GameName = "";
     private string GameCategory = "";
     private int NumberOfSplits = 0;
-    private float average_transition_max_level = 0.0f;
-    private int num_transitions = 0;
-    private int num_transitions_for_calibration = 2; // How many pre-load screens are necessary to calibrate to the correct black level
-    private float sum_transitions_max_level = 0.0f;
-    private float last_transition_max_level = 0.0f;
-    private float max_transition_max_level = 0.0f;
     private List<string> SplitNames;
     private DateTime lastTime;
     private DateTime transitionStart;
@@ -166,9 +160,10 @@ namespace LiveSplit.UI.Components
           //Capture image using the settings defined for the component
           Bitmap capture = settings.CaptureImage();
           List<int> max_per_patch;
+          List<int> min_per_patch;
           //Feed the image to the feature detection
           int black_level = 0;
-          var features = FeatureDetector.featuresFromBitmap(capture, out max_per_patch, out black_level);
+          var features = FeatureDetector.featuresFromBitmap(capture, out max_per_patch, out black_level, out min_per_patch);
           int tempMatchingBins = 0;
           bool wasLoading = isLoading;
           bool wasTransition = isTransition;
@@ -207,14 +202,7 @@ namespace LiveSplit.UI.Components
             float new_avg_transition_max = 0.0f;
             try
             {
-              if (num_transitions >= num_transitions_for_calibration)
-              {
-                isTransition = FeatureDetector.compareFeatureVectorTransition(features.ToArray(), FeatureDetector.listOfFeatureVectorsEng, max_per_patch, average_transition_max_level, out new_avg_transition_max, out tempMatchingBins, 0.8f, false);//FeatureDetector.isGameTransition(capture, 30);
-              }
-              else
-              {
-                isTransition = FeatureDetector.compareFeatureVectorTransition(features.ToArray(), FeatureDetector.listOfFeatureVectorsEng, max_per_patch, -1.0f, out new_avg_transition_max, out tempMatchingBins, 0.8f, false);//FeatureDetector.isGameTransition(capture, 30);
-              }
+                isTransition = FeatureDetector.compareFeatureVectorTransition(features.ToArray(), FeatureDetector.listOfFeatureVectorsEng, max_per_patch, min_per_patch, - 1.0f, out new_avg_transition_max, out tempMatchingBins, 0.8f, false);//FeatureDetector.isGameTransition(capture, 30);
             }
             catch (Exception ex)
             {
@@ -238,26 +226,7 @@ namespace LiveSplit.UI.Components
 
             //Console.WriteLine("GAMETIMEPAUSETIME: {0}", timer.CurrentState.GameTimePauseTime);
 
-            if (!isLoading)
-            {
-              last_transition_max_level = new_avg_transition_max;
-            }
-            else if(settings.RemoveFadeins)
-            {
-              first_frame_post_load_transition = false;
-            }
-
-            if(!wasLoading && isLoading)
-            {
-              num_transitions++;
-              sum_transitions_max_level += last_transition_max_level;
-              average_transition_max_level = sum_transitions_max_level / num_transitions;
-              max_transition_max_level = Math.Max(last_transition_max_level, max_transition_max_level);
-              Console.WriteLine("pre-load black-level: Average transition {5}: num: {0}, sum: {1}, last: {2}, avg: {3}, max: {4}", num_transitions, sum_transitions_max_level, last_transition_max_level, average_transition_max_level, max_transition_max_level, SplitNames[Math.Max(Math.Min(liveSplitState.CurrentSplitIndex, SplitNames.Count - 1), 0)]);
-              last_transition_max_level = 0.0f;
-              settings.SetBlackLevel(Convert.ToInt32(average_transition_max_level));
-            }
-
+            
             if (wasTransition && isLoading)
             {
               // This was a pre-load transition, subtract the gametime
@@ -291,23 +260,7 @@ namespace LiveSplit.UI.Components
                 Console.WriteLine("POST-LOAD TRANSITION {2} seconds: {0}, totalPausedTime: {1}", delta.TotalSeconds, total_paused_time, SplitNames[Math.Max(Math.Min(liveSplitState.CurrentSplitIndex, SplitNames.Count - 1), 0)]);
               }
 
-              if(wasLoading && !isLoading && isTransition)
-              {
-
-               if (first_frame_post_load_transition == false)
-                {
-                  num_transitions++;
-                  sum_transitions_max_level += last_transition_max_level;
-                  average_transition_max_level = sum_transitions_max_level / num_transitions;
-                  max_transition_max_level = Math.Max(last_transition_max_level, max_transition_max_level);
-                  Console.WriteLine("post-load black-level: Average transition {5}: num: {0}, sum: {1}, last: {2}, avg: {3}, max: {4}", num_transitions, sum_transitions_max_level, last_transition_max_level, average_transition_max_level, max_transition_max_level, SplitNames[Math.Max(Math.Min(liveSplitState.CurrentSplitIndex, SplitNames.Count - 1), 0)]);
-                  last_transition_max_level = 0.0f;
-                  first_frame_post_load_transition = true;
-                  settings.SetBlackLevel(Convert.ToInt32(average_transition_max_level));
-                }
-
-              }
-
+             
               if (postLoadTransition == true && isTransition)
               {
                 // We are transitioning after a load screen, this stops the timer, and actually increases the load time
@@ -464,11 +417,6 @@ namespace LiveSplit.UI.Components
       //highResTimer.Stop(joinThread:false);
       InitNumberOfLoadsFromState();
 
-      average_transition_max_level = 0.0f;
-      last_transition_max_level = 0.0f;
-      num_transitions = 0;
-      sum_transitions_max_level = 0.0f;
-      max_transition_max_level = 0.0f;
       first_frame_post_load_transition = false;
       total_paused_time = 0.0f;
 
@@ -495,11 +443,6 @@ namespace LiveSplit.UI.Components
       pausedFrames = 0;
       timerStarted = true;
       threadRunning = true;
-      average_transition_max_level = 0.0f;
-      last_transition_max_level = 0.0f;
-      num_transitions = 0;
-      sum_transitions_max_level = 0.0f;
-      max_transition_max_level = 0.0f;
       first_frame_post_load_transition = false;
       total_paused_time = 0.0f;
 
@@ -604,26 +547,6 @@ namespace LiveSplit.UI.Components
     public void Update(IInvalidator invalidator, LiveSplitState state, float width, float height, LayoutMode mode)
     {
       frame_count++;
-      if (settings.RecordImages && (frame_count % 3) == 0)
-      {
-        System.IO.Directory.CreateDirectory(Path.Combine(settings.DetectionLogFolderName, "CaptureImages"));
-        string fileName = Path.Combine(settings.DetectionLogFolderName, "CaptureImages", "CTRNitroFueledLoadRemover_Log_" + DateTime.Now.ToString("yyyy_MM_dd_HH_mm_ss_fff") + settings.removeInvalidXMLCharacters(GameName) + "_" + settings.removeInvalidXMLCharacters(GameCategory) + ".png");
-
-
-        using (MemoryStream memory = new MemoryStream())
-        {
-          using (FileStream fs = new FileStream(fileName, FileMode.Create, FileAccess.ReadWrite))
-          {
-            Bitmap capture = settings.CaptureImage();
-            capture.Save(memory, ImageFormat.Png);
-            byte[] bytes = memory.ToArray();
-            fs.Write(bytes, 0, bytes.Length);
-          }
-        }
-
-      }
-
-
 
       if (SplitsAreDifferent(state))
       {
@@ -631,6 +554,12 @@ namespace LiveSplit.UI.Components
 
         ReloadLogFile();
       }
+
+      if (settings.RecordImages && (frame_count % 3) == 0)
+      {
+        settings.StoreCaptureImage(GameName, GameCategory);
+      }
+
       liveSplitState = state;
       /*
 			liveSplitState = state;

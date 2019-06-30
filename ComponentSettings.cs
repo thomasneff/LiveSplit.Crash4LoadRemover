@@ -108,7 +108,7 @@ namespace LiveSplit.UI.Components
 
     #region Public Constructors
 
-    private string LoadRemoverDataName = "Components/LiveSplit.CTRNitroFueledLoadRemover.data";
+    private string LoadRemoverDataName = "";
 
     public class Binder : System.Runtime.Serialization.SerializationBinder
     {
@@ -117,6 +117,31 @@ namespace LiveSplit.UI.Components
         Assembly ass = Assembly.Load(assemblyName);
         return ass.GetType(typeName);
       }
+    }
+
+
+    private void cmbDatabase_SelectedIndexChanged(object sender, EventArgs e)
+    {
+      LoadRemoverDataName = cmbDatabase.SelectedItem.ToString();
+      DeserializeAndUpdateDetectorData();
+    }
+
+    private void SetComboBoxToStoredDatabase(string database)
+    {
+      for(int item_index = 0; item_index < cmbDatabase.Items.Count; item_index++)
+      {
+        var item = cmbDatabase.Items[item_index];
+        if (item.ToString() == database)
+        {
+          cmbDatabase.SelectedIndex = item_index;
+          return;
+        }
+      }
+    }
+
+    private string[] getDatabaseFiles()
+    {
+      return Directory.GetFiles("Components/", "*.ctrnfdata");
     }
 
     private void DeserializeAndUpdateDetectorData()
@@ -147,6 +172,20 @@ namespace LiveSplit.UI.Components
 		{
 			InitializeComponent();
 
+      string[] database_files = getDatabaseFiles();
+
+      if(database_files.Length == 0)
+      {
+        MessageBox.Show("Error: Please make sure that at least one .ctrnfdata file exists in the Components directory!", "CTRNF Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        Application.Exit();
+      }
+
+      cmbDatabase.Items.Clear();
+      foreach (string database_file in database_files)
+      {
+        cmbDatabase.Items.Add(database_file);
+      }
+      cmbDatabase.SelectedIndex = 0;
       //RemoveFadeins = chkRemoveFadeIns.Checked;
       DeserializeAndUpdateDetectorData();
 
@@ -173,6 +212,46 @@ namespace LiveSplit.UI.Components
 		#endregion Public Constructors
 
 		#region Public Methods
+
+    public void StoreCaptureImage(string gameName, string category)
+    {
+      System.IO.Directory.CreateDirectory(Path.Combine(DetectionLogFolderName, devToolsCaptureImageText.Text));
+
+      string capture_time = DateTime.Now.ToString("yyyy_MM_dd_HH_mm_ss_fff");
+
+      for (int offset_x = -4; offset_x <= 4; offset_x += 2)
+      {
+        for (int offset_y = -4; offset_y <= 4; offset_y += 2)
+        {
+          imageCaptureInfo.cropOffsetY = cropOffsetY + offset_y;
+          imageCaptureInfo.cropOffsetX = cropOffsetX + offset_x;
+          CaptureImageFullPreview(ref imageCaptureInfo, true);
+
+          string fileName = Path.Combine(DetectionLogFolderName, devToolsCaptureImageText.Text, "CTRNitroFueledLoadRemover_Log_" + capture_time + removeInvalidXMLCharacters(gameName) + "_" + removeInvalidXMLCharacters(category) + "_" + offset_x + "_" + offset_y + ".png");
+
+
+          using (MemoryStream memory = new MemoryStream())
+          {
+            using (FileStream fs = new FileStream(fileName, FileMode.Create, FileAccess.ReadWrite))
+            {
+              Bitmap capture = CaptureImage();
+              capture.Save(memory, ImageFormat.Png);
+              byte[] bytes = memory.ToArray();
+              fs.Write(bytes, 0, bytes.Length);
+            }
+          }
+        }
+          
+      }
+
+
+      imageCaptureInfo.cropOffsetY = cropOffsetY;
+      imageCaptureInfo.cropOffsetX = cropOffsetX;
+      CaptureImageFullPreview(ref imageCaptureInfo, true);
+      devToolsCroppedPictureBox.Image = CaptureImage();
+
+      
+    }
 
     public void SetBlackLevel(int black_level)
     {
@@ -435,6 +514,7 @@ namespace LiveSplit.UI.Components
 			settingsNode.AppendChild(ToElement(document, "RemoveFadeouts", chkRemoveTransitions.Checked));
       //settingsNode.AppendChild(ToElement(document, "RemoveFadeins", chkRemoveFadeIns.Checked));
       settingsNode.AppendChild(ToElement(document, "SaveDetectionLog", chkSaveDetectionLog.Checked));
+      settingsNode.AppendChild(ToElement(document, "DatabaseFile", cmbDatabase.SelectedItem.ToString()));
 
       var splitsNode = document.CreateElement("AutoSplitGames");
 
@@ -566,6 +646,11 @@ namespace LiveSplit.UI.Components
         if (element["SaveDetectionLog"] != null)
         {
           chkSaveDetectionLog.Checked = Convert.ToBoolean(element["SaveDetectionLog"].InnerText);
+        }
+
+        if (element["DatabaseFile"] != null)
+        {
+          SetComboBoxToStoredDatabase(element["DatabaseFile"].InnerText);
         }
 
         if (element["AutoSplitGames"] != null)
@@ -777,8 +862,9 @@ namespace LiveSplit.UI.Components
 				//Show matching bins for preview
 				var capture = CaptureImage();
         List<int> dummy;
+        List<int> dummy2;
         int black_level = 0;
-				var features = FeatureDetector.featuresFromBitmap(capture, out dummy, out black_level);
+				var features = FeatureDetector.featuresFromBitmap(capture, out dummy, out black_level, out dummy2);
 				int tempMatchingBins = 0;
 				var isLoading = FeatureDetector.compareFeatureVector(features.ToArray(), FeatureDetector.listOfFeatureVectorsEng, out tempMatchingBins, -1.0f, false);
 
@@ -1107,6 +1193,103 @@ namespace LiveSplit.UI.Components
       RecordImages = devToolsRecord.Checked;
     }
 
+    private bool IsFeatureUnique(DetectorData data, int[] feature)
+    {
+      foreach(int[] data_feature in data.features)
+      {
+        bool identical = true;
+        for(int i = 0; i < data_feature.Length; i++)
+        {
+          if (data_feature[i] != feature[i])
+          {
+            identical = false;
+            break;
+          }
+        }
+
+        if (identical)
+          return false;
+      }
+
+      return true;
+    }
+
+
+    private void ComputeDatabaseFromPath(string path)
+    {
+      DetectorData data = new DetectorData();
+      data.sizeX = captureSize.Width;
+      data.sizeY = captureSize.Height;
+      data.numberOfHistogramBins = 16;
+      data.numPatchesX = 6;
+      data.numPatchesY = 2;
+      data.offsetX = Convert.ToInt32(cropOffsetX);
+      data.offsetY = Convert.ToInt32(cropOffsetY);
+      data.features = new List<int[]>();
+
+      var files = System.IO.Directory.GetFiles(path);
+
+      int[] downsampling_factors = { 1, 2, 4, 8 };
+      int[] pixel_shifts = { -4, 0, 4 };
+      InterpolationMode[] interpolation_modes = { InterpolationMode.Bilinear, InterpolationMode.Bicubic };
+
+      foreach (string filename in files)
+      {
+
+        foreach (int downsampling_factor in downsampling_factors)
+        {
+          foreach (int pixel_shift in pixel_shifts)
+          {
+            foreach (InterpolationMode interpolation_mode in interpolation_modes)
+            {
+              Bitmap bmp = new Bitmap(filename);
+
+              //Make 32 bit ARGB bitmap
+              Bitmap clone = new Bitmap(bmp.Width, bmp.Height,
+                System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+
+              //Make 32 bit ARGB bitmap
+              Bitmap sample_factor_clone = new Bitmap(bmp.Width / downsampling_factor, bmp.Height / downsampling_factor,
+                System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+
+              using (Graphics gr = Graphics.FromImage(sample_factor_clone))
+              {
+                gr.InterpolationMode = interpolation_mode;
+                gr.DrawImage(bmp, new Rectangle(0, 0, sample_factor_clone.Width, sample_factor_clone.Height));
+              }
+
+              using (Graphics gr = Graphics.FromImage(clone))
+              {
+                gr.InterpolationMode = interpolation_mode;
+                gr.DrawImage(sample_factor_clone, new Rectangle(0, 0, clone.Width, clone.Height));
+              }
+
+              int black_level = 0;
+              List<int> max_per_patch = new List<int>();
+              List<int> min_per_patch = new List<int>();
+              int[] feature = FeatureDetector.featuresFromBitmap(clone, out max_per_patch, out black_level, out min_per_patch).ToArray();
+
+              if(IsFeatureUnique(data, feature))
+              {
+                data.features.Add(feature);
+              }
+                                       
+
+              bmp.Dispose();
+              clone.Dispose();
+              sample_factor_clone.Dispose();
+            }
+          }
+
+
+        }
+
+
+      }
+
+      SerializeDetectorData(data);
+    }
+
     private void devToolsDatabaseButton_Click(object sender, EventArgs e)
     {
       using (var fbd = new System.Windows.Forms.FolderBrowserDialog())
@@ -1117,44 +1300,8 @@ namespace LiveSplit.UI.Components
         {
           return;
         }
-
-        DetectorData data = new DetectorData();
-        data.sizeX = captureSize.Width;
-        data.sizeY = captureSize.Height;
-        data.numberOfHistogramBins = 16;
-        data.numPatchesX = 6;
-        data.numPatchesY = 2;
-        data.offsetX = Convert.ToInt32(cropOffsetX);
-        data.offsetY = Convert.ToInt32(cropOffsetY);
-        data.features = new List<int[]>();
-
-        var files = System.IO.Directory.GetFiles(fbd.SelectedPath);
-
-        foreach(string filename in files)
-        {
-          Bitmap bmp = new Bitmap(filename);
-
-          //Make 32 bit ARGB bitmap
-          Bitmap clone = new Bitmap(bmp.Width, bmp.Height,
-            System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-
-          using (Graphics gr = Graphics.FromImage(clone))
-          {
-            gr.DrawImage(bmp, new Rectangle(0, 0, clone.Width, clone.Height));
-          }
-
-          int black_level = 0;
-          List<int> max_per_patch = new List<int>();
-          data.features.Add(FeatureDetector.featuresFromBitmap(clone, out max_per_patch, out black_level).ToArray());
-
-
-          
-
-          bmp.Dispose();
-          clone.Dispose();
-        }
-
-        SerializeDetectorData(data);
+ 
+        ComputeDatabaseFromPath(fbd.SelectedPath);
         
       }
       
@@ -1166,7 +1313,7 @@ namespace LiveSplit.UI.Components
     {
       IFormatter formatter = new BinaryFormatter();
       System.IO.Directory.CreateDirectory(Path.Combine(DetectionLogFolderName, "SerializedData"));
-      Stream stream = new FileStream(Path.Combine(DetectionLogFolderName, "SerializedData", DateTime.Now.ToString("yyyy_MM_dd_HH_mm_ss_fff") + ".data"), FileMode.Create, FileAccess.Write);
+      Stream stream = new FileStream(Path.Combine(DetectionLogFolderName, "SerializedData", "LiveSplit.CTRNitroFueledLoadRemover_" + DateTime.Now.ToString("yyyy_MM_dd_HH_mm_ss_fff") + ".ctrnfdata"), FileMode.Create, FileAccess.Write);
 
       formatter.Serialize(stream, data);
       stream.Close();
@@ -1180,6 +1327,11 @@ namespace LiveSplit.UI.Components
       DetectorData data = (DetectorData)formatter.Deserialize(stream);
       stream.Close();
       return data;
+    }
+
+    private void devToolsDataBaseFromCaptureImages_Click(object sender, EventArgs e)
+    {
+      ComputeDatabaseFromPath(Path.Combine(DetectionLogFolderName, devToolsCaptureImageText.Text));
     }
 
   }

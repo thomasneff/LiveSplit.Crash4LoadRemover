@@ -85,7 +85,9 @@ namespace CrashNSaneLoadDetector
 				if (matchingBins >= numberOfBinsCorrect)
 				{
 					int a = 3;
-				}
+          //if we found enough similarities, we found a match. this will early-out for speed, but possibly report lower matchingBins values
+          return true;
+        }
 			}
 
 			if (debugOutput)
@@ -170,32 +172,32 @@ namespace CrashNSaneLoadDetector
 
 			return (b < black_level && r < black_level && g < black_level);
 		}
+    
 
+    private static bool checkBlackLevelTransition(int[] newVector, int[,] comparison_vectors, List<int> max_per_patch, List<int> min_per_patch, float max_transition_threshold, out float average_max_transition, out int matchingBins, float percentageOfBinsCorrectOverride = -1.0f, bool debugOutput = true)
+    {
+      //int[,] comparison_vectors = listOfFeatureVectorsEng;
+      int size = newVector.Length;
 
-		public static bool compareFeatureVectorTransition(int[] newVector, int[,] comparison_vectors, List<int> max_per_patch, float max_transition_threshold, out float average_max_transition, out int matchingBins, float percentageOfBinsCorrectOverride = -1.0f, bool debugOutput = true)
-		{
-			//int[,] comparison_vectors = listOfFeatureVectorsEng;
-			int size = newVector.Length;
+      if (comparison_vectors.GetLength(1) < size)
+      {
+        size = comparison_vectors.GetLength(1);
+      }
 
-			if (comparison_vectors.GetLength(1) < size)
-			{
-				size = comparison_vectors.GetLength(1);
-			}
+      //int number_of_bins_needed = 290;// (int) (size * percent_of_bins_correct);
 
-			//int number_of_bins_needed = 290;// (int) (size * percent_of_bins_correct);
+      int numVectors = comparison_vectors.GetLength(0);
 
-			int numVectors = comparison_vectors.GetLength(0);
+      // For the transitions, we want to check if the screen is black, that is the sum of the lowest 3 bins (color range from 0 - (256/numberOfBins) * 3 -> 0 - 48
+      // This should be robust enough unless people have got some serious issues with their black in their captures
 
-			// For the transitions, we want to check if the screen is black, that is the sum of the lowest 3 bins (color range from 0 - (256/numberOfBins) * 3 -> 0 - 48
-			// This should be robust enough unless people have got some serious issues with their black in their captures
+      matchingBins = 0;
 
-			matchingBins = 0;
-
-			int number_of_black_bins = 4;
+      int number_of_black_bins = 4;
 
       int black_level = (256 / numberOfBins) * 2;
 
-      if(max_transition_threshold > 0)
+      if (max_transition_threshold > 0)
       {
         black_level = Convert.ToInt32(max_transition_threshold);
       }
@@ -223,7 +225,7 @@ namespace CrashNSaneLoadDetector
       //Console.WriteLine("Black Level {0}", max_max_transition);
 
       // If we have a max_transition_threshold given from averaging, we can say that it is a transition if we are below the threshold with a given tolerance.
-      if(max_transition_threshold > 0 && average_max_transition <= (max_transition_threshold + transition_tolerance))
+      if (max_transition_threshold > 0 && average_max_transition <= (max_transition_threshold + transition_tolerance))
       {
         //Console.WriteLine("Detected max {0} > {1}, no transition!", max_max_transition, max_transition_threshold + transition_tolerance);
         return true;
@@ -241,65 +243,65 @@ namespace CrashNSaneLoadDetector
           }
         }
       }
-      
+
 
       // Console.WriteLine("Detected max {0} <= {1}, might transition!", max_max, black_level);
       int num_total_pixels_per_patch = patchSizeX * patchSizeY;
 
-			float percentage_correct = ((num_total_pixels_per_patch) * percentageOfBinsCorrectOverride);
-			int matching_patches = 0;
-			int total_patches = 0;
-			int similarity_additive_difference = 100;
-			// Iterate over each histogram
-			for (int bin = 0; bin < size; bin += (numberOfBins * 3))
-			{
-				int sum_red = 0;
-				int sum_green = 0;
-				int sum_blue = 0;
-				bool rgb_similarity = true;
+      float percentage_correct = ((num_total_pixels_per_patch) * percentageOfBinsCorrectOverride);
+      int matching_patches = 0;
+      int total_patches = 0;
+      int similarity_additive_difference = 100;
+      // Iterate over each histogram
+      for (int bin = 0; bin < size; bin += (numberOfBins * 3))
+      {
+        int sum_red = 0;
+        int sum_green = 0;
+        int sum_blue = 0;
+        bool rgb_similarity = true;
 
-				for (int black_bin_offset = 0; black_bin_offset < number_of_black_bins; black_bin_offset++)
-				{
-					int r = newVector[bin + black_bin_offset];
-					int g = newVector[bin + numberOfBins + black_bin_offset];
-					int b = newVector[bin + 2 * numberOfBins + black_bin_offset];
-					sum_red += r;
-					sum_green += g;
-					sum_blue += b;
+        for (int black_bin_offset = 0; black_bin_offset < number_of_black_bins; black_bin_offset++)
+        {
+          int r = newVector[bin + black_bin_offset];
+          int g = newVector[bin + numberOfBins + black_bin_offset];
+          int b = newVector[bin + 2 * numberOfBins + black_bin_offset];
+          sum_red += r;
+          sum_green += g;
+          sum_blue += b;
 
-					int min_rgb = Math.Min(b + similarity_additive_difference, Math.Min(r + similarity_additive_difference, g + similarity_additive_difference));
-					int max_rgb = Math.Max(b - similarity_additive_difference, Math.Max(r - similarity_additive_difference, g - similarity_additive_difference));
+          int min_rgb = Math.Min(b + similarity_additive_difference, Math.Min(r + similarity_additive_difference, g + similarity_additive_difference));
+          int max_rgb = Math.Max(b - similarity_additive_difference, Math.Max(r - similarity_additive_difference, g - similarity_additive_difference));
 
-					if ((r < min_rgb && r > max_rgb && g < min_rgb && g > max_rgb && b < min_rgb && b > max_rgb) == false)
-					{
-						rgb_similarity = false;
-					}
+          if ((r < min_rgb && r > max_rgb && g < min_rgb && g > max_rgb && b < min_rgb && b > max_rgb) == false)
+          {
+            rgb_similarity = false;
+          }
 
-				}
+        }
 
-				total_patches++;
+        total_patches++;
 
-				// Check if the distribution matches, also check if all channels are similar in range
-				if (sum_red >= percentage_correct
-					&& sum_green >= percentage_correct
-					&& sum_blue >= percentage_correct
-					&& rgb_similarity == true
-					)
-				{
-					matching_patches++;
-				}
-			}
+        // Check if the distribution matches, also check if all channels are similar in range
+        if (sum_red >= percentage_correct
+          && sum_green >= percentage_correct
+          && sum_blue >= percentage_correct
+          && rgb_similarity == true
+          )
+        {
+          matching_patches++;
+        }
+      }
 
-			//Console.WriteLine("Transition: Matching {0}, Total {1}", matching_patches, total_patches);
-			if (matching_patches == total_patches)
-			{
-				return true;
-			}
+      //Console.WriteLine("Transition: Matching {0}, Total {1}", matching_patches, total_patches);
+      if (matching_patches == total_patches)
+      {
+        return true;
+      }
 
 
       // Finally, only if we haven't calibrated yet, we check the patch max for a conservative detection
 
-      if(max_transition_threshold < 0)
+      if (max_transition_threshold < 0)
       {
         if (max_max < (black_level + 1))
           return true;
@@ -307,12 +309,162 @@ namespace CrashNSaneLoadDetector
 
 
       return false;
+    }
+
+    private static bool checkWhiteLevelTransition(int[] newVector, int[,] comparison_vectors, List<int> max_per_patch, List<int> min_per_patch, float max_transition_threshold, out float average_max_transition, out int matchingBins, float percentageOfBinsCorrectOverride = -1.0f, bool debugOutput = true)
+    {
+      //int[,] comparison_vectors = listOfFeatureVectorsEng;
+      int size = newVector.Length;
+
+      if (comparison_vectors.GetLength(1) < size)
+      {
+        size = comparison_vectors.GetLength(1);
+      }
+
+      //int number_of_bins_needed = 290;// (int) (size * percent_of_bins_correct);
+
+      int numVectors = comparison_vectors.GetLength(0);
+
+      // For the transitions, we want to check if the screen is black, that is the sum of the lowest 3 bins (color range from 0 - (256/numberOfBins) * 3 -> 0 - 48
+      // This should be robust enough unless people have got some serious issues with their black in their captures
+
+      matchingBins = 0;
+
+      int number_of_white_bins = 4;
+
+      int white_level = (256 / numberOfBins) * (numberOfBins - 2);
+
+      if (max_transition_threshold > 0)
+      {
+        white_level = Convert.ToInt32(max_transition_threshold);
+      }
+
+      int min_min = 9999;
+      average_max_transition = 0.0f;
+
+
+      int transition_tolerance = 253;
+
+
+      foreach (int min_val in min_per_patch)
+      {
+        min_min = Math.Min(min_val, min_min);
+        average_max_transition += min_min;
+      }
+
+      // Average of patch-max values for black level calibration
+      average_max_transition = average_max_transition / max_per_patch.Count;
+
+      // Baseline: If the *maximum* of all pixels is less than the tolerance, we can immediately decide that it is a transition.
+      if (min_min > transition_tolerance - 2)
+        return true;
+
+      //Console.WriteLine("Black Level {0}", max_max_transition);
+
+      // If we have a max_transition_threshold given from averaging, we can say that it is a transition if we are below the threshold with a given tolerance.
+      if (max_transition_threshold > 0 && average_max_transition <= (max_transition_threshold + transition_tolerance))
+      {
+        //Console.WriteLine("Detected max {0} > {1}, no transition!", max_max_transition, max_transition_threshold + transition_tolerance);
+        return true;
+      }
+      else
+      {
+        // Additional check in case the black level isn't calibrated yet
+        // Here we can only ensure if we are *not* in a transition because we're checking max values for each patch. 
+        foreach (int min_val in min_per_patch)
+        {
+          if (min_val < white_level)
+          {
+            //Console.WriteLine("Detected max {0} > {1}, no transition!", max_val, black_level);
+            return false;
+          }
+        }
+      }
+
+
+      // Console.WriteLine("Detected max {0} <= {1}, might transition!", max_max, black_level);
+      int num_total_pixels_per_patch = patchSizeX * patchSizeY;
+
+      float percentage_correct = ((num_total_pixels_per_patch) * percentageOfBinsCorrectOverride);
+      int matching_patches = 0;
+      int total_patches = 0;
+      int similarity_additive_difference = 100;
+      // Iterate over each histogram
+      for (int bin = 0; bin < size; bin += (numberOfBins * 3))
+      {
+        int sum_red = 0;
+        int sum_green = 0;
+        int sum_blue = 0;
+        bool rgb_similarity = true;
+
+        for (int white_bin_offset = numberOfBins - number_of_white_bins; white_bin_offset < number_of_white_bins; white_bin_offset++)
+        {
+          int r = newVector[bin + white_bin_offset];
+          int g = newVector[bin + numberOfBins + white_bin_offset];
+          int b = newVector[bin + 2 * numberOfBins + white_bin_offset];
+          sum_red += r;
+          sum_green += g;
+          sum_blue += b;
+
+          int min_rgb = Math.Min(b + similarity_additive_difference, Math.Min(r + similarity_additive_difference, g + similarity_additive_difference));
+          int max_rgb = Math.Max(b - similarity_additive_difference, Math.Max(r - similarity_additive_difference, g - similarity_additive_difference));
+
+          if ((r < min_rgb && r > max_rgb && g < min_rgb && g > max_rgb && b < min_rgb && b > max_rgb) == false)
+          {
+            rgb_similarity = false;
+          }
+
+        }
+
+        total_patches++;
+
+        // Check if the distribution matches, also check if all channels are similar in range
+        if (sum_red >= percentage_correct
+          && sum_green >= percentage_correct
+          && sum_blue >= percentage_correct
+          && rgb_similarity == true
+          )
+        {
+          matching_patches++;
+        }
+      }
+
+      //Console.WriteLine("Transition: Matching {0}, Total {1}", matching_patches, total_patches);
+      if (matching_patches == total_patches)
+      {
+        return true;
+      }
+
+
+      // Finally, only if we haven't calibrated yet, we check the patch min for a conservative detection
+
+      if (max_transition_threshold < 0)
+      {
+        if (min_min > (white_level - 1))
+          return true;
+      }
+
+
+      return false;
+    }
+
+    public static bool compareFeatureVectorTransition(int[] newVector, int[,] comparison_vectors, List<int> max_per_patch, List<int> min_per_patch, float max_transition_threshold, out float average_max_transition, out int matchingBins, float percentageOfBinsCorrectOverride = -1.0f, bool debugOutput = true)
+		{
+
+      if (checkBlackLevelTransition(newVector, comparison_vectors, max_per_patch, min_per_patch, max_transition_threshold, out average_max_transition, out matchingBins, percentageOfBinsCorrectOverride, debugOutput))
+        return true;
+
+      if (checkWhiteLevelTransition(newVector, comparison_vectors, max_per_patch, min_per_patch, max_transition_threshold, out average_max_transition, out matchingBins, percentageOfBinsCorrectOverride, debugOutput))
+        return true;
+
+      return false;
 		}
 
-		public static List<int> featuresFromBitmap(Bitmap capture, out List<int> max_per_patch, out int black_level)
+		public static List<int> featuresFromBitmap(Bitmap capture, out List<int> max_per_patch, out int black_level, out List<int> min_per_patch)
 		{
 			List<int> features = new List<int>();
       max_per_patch = new List<int>();
+      min_per_patch = new List<int>();
       black_level = 255;
 			BitmapData bData = capture.LockBits(new Rectangle(0, 0, capture.Width, capture.Height), ImageLockMode.ReadWrite, capture.PixelFormat);
 			int bmpStride = bData.Stride;
@@ -347,6 +499,9 @@ namespace CrashNSaneLoadDetector
           int b_max = 0;
           int g_max = 0;
           int r_max = 0;
+          int b_min = 9999;
+          int g_min = 9999;
+          int r_min = 9999;
 
 					for (int x_index = xStart; x_index < xEnd; x_index += stride)
 					{
@@ -366,6 +521,10 @@ namespace CrashNSaneLoadDetector
               g_max = Math.Max(g, g_max);
               r_max = Math.Max(r, r_max);
 
+              b_min = Math.Min(b, b_min);
+              g_min = Math.Min(g, g_min);
+              r_min = Math.Min(r, r_min);
+
 							patchHistR[(r * numberOfBins) / 256]++;
 							patchHistG[(g * numberOfBins) / 256]++;
 							patchHistB[(b * numberOfBins) / 256]++;
@@ -375,6 +534,10 @@ namespace CrashNSaneLoadDetector
           max_per_patch.Add(b_max);
           max_per_patch.Add(g_max);
           max_per_patch.Add(r_max);
+
+          min_per_patch.Add(b_min);
+          min_per_patch.Add(g_min);
+          min_per_patch.Add(r_min);
 
           //enter the histograms as our features
           features.AddRange(patchHistR);
