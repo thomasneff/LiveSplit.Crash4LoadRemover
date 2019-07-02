@@ -163,6 +163,7 @@ namespace LiveSplit.UI.Components
           List<int> min_per_patch;
           //Feed the image to the feature detection
           int black_level = 0;
+          //
           var features = FeatureDetector.featuresFromBitmap(capture, out max_per_patch, out black_level, out min_per_patch);
           int tempMatchingBins = 0;
           bool wasLoading = isLoading;
@@ -172,7 +173,9 @@ namespace LiveSplit.UI.Components
 
           try
           {
+            //DateTime current_time = DateTime.Now;
             isLoading = FeatureDetector.compareFeatureVector(features.ToArray(), FeatureDetector.listOfFeatureVectorsEng, out tempMatchingBins, -1.0f, false);
+            //Console.WriteLine("Timing for detection: {0}", (DateTime.Now - current_time).TotalSeconds);
           }
           catch (Exception ex)
           {

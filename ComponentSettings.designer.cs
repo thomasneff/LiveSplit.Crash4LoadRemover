@@ -46,6 +46,8 @@
       this.updatePreviewButton = new System.Windows.Forms.Button();
       this.tabControl1 = new System.Windows.Forms.TabControl();
       this.tabPage1 = new System.Windows.Forms.TabPage();
+      this.label12 = new System.Windows.Forms.Label();
+      this.cmbDatabase = new System.Windows.Forms.ComboBox();
       this.lblBlackLevel = new System.Windows.Forms.Label();
       this.chkRemoveFadeIns = new System.Windows.Forms.CheckBox();
       this.chkSaveDetectionLog = new System.Windows.Forms.CheckBox();
@@ -69,8 +71,6 @@
       this.devToolsCropX = new System.Windows.Forms.NumericUpDown();
       this.label7 = new System.Windows.Forms.Label();
       this.devToolsCroppedPictureBox = new System.Windows.Forms.PictureBox();
-      this.label12 = new System.Windows.Forms.Label();
-      this.cmbDatabase = new System.Windows.Forms.ComboBox();
       ((System.ComponentModel.ISupportInitialize)(this.previewPictureBox)).BeginInit();
       ((System.ComponentModel.ISupportInitialize)(this.croppedPreviewPictureBox)).BeginInit();
       ((System.ComponentModel.ISupportInitialize)(this.trackBar1)).BeginInit();
@@ -202,40 +202,42 @@
       // matchDisplayLabel
       // 
       this.matchDisplayLabel.AutoSize = true;
-      this.matchDisplayLabel.Location = new System.Drawing.Point(21, 23);
+      this.matchDisplayLabel.Location = new System.Drawing.Point(13, 23);
       this.matchDisplayLabel.Name = "matchDisplayLabel";
       this.matchDisplayLabel.Size = new System.Drawing.Size(13, 13);
       this.matchDisplayLabel.TabIndex = 33;
       this.matchDisplayLabel.Text = "0";
+      this.matchDisplayLabel.Visible = false;
       // 
       // label5
       // 
       this.label5.AutoSize = true;
       this.label5.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.label5.Location = new System.Drawing.Point(3, 3);
+      this.label5.Location = new System.Drawing.Point(64, 3);
       this.label5.Name = "label5";
-      this.label5.Size = new System.Drawing.Size(116, 16);
+      this.label5.Size = new System.Drawing.Size(69, 16);
       this.label5.TabIndex = 34;
-      this.label5.Text = "Current / Required";
+      this.label5.Text = "Threshold";
       // 
       // requiredMatchesUpDown
       // 
+      this.requiredMatchesUpDown.DecimalPlaces = 4;
       this.requiredMatchesUpDown.Increment = new decimal(new int[] {
             5,
             0,
             0,
-            0});
+            196608});
       this.requiredMatchesUpDown.Location = new System.Drawing.Point(67, 21);
       this.requiredMatchesUpDown.Maximum = new decimal(new int[] {
-            575,
+            1,
             0,
             0,
             0});
       this.requiredMatchesUpDown.Name = "requiredMatchesUpDown";
-      this.requiredMatchesUpDown.Size = new System.Drawing.Size(42, 20);
+      this.requiredMatchesUpDown.Size = new System.Drawing.Size(62, 20);
       this.requiredMatchesUpDown.TabIndex = 36;
       this.requiredMatchesUpDown.Value = new decimal(new int[] {
-            520,
+            1,
             0,
             0,
             0});
@@ -314,6 +316,27 @@
       this.tabPage1.Size = new System.Drawing.Size(468, 506);
       this.tabPage1.TabIndex = 0;
       this.tabPage1.Text = "Setup";
+      // 
+      // label12
+      // 
+      this.label12.AutoSize = true;
+      this.label12.Location = new System.Drawing.Point(28, 48);
+      this.label12.Name = "label12";
+      this.label12.Size = new System.Drawing.Size(56, 13);
+      this.label12.TabIndex = 43;
+      this.label12.Text = "Database:";
+      // 
+      // cmbDatabase
+      // 
+      this.cmbDatabase.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+      this.cmbDatabase.FormattingEnabled = true;
+      this.cmbDatabase.Items.AddRange(new object[] {
+            "Full Display (Primary)"});
+      this.cmbDatabase.Location = new System.Drawing.Point(86, 45);
+      this.cmbDatabase.Name = "cmbDatabase";
+      this.cmbDatabase.Size = new System.Drawing.Size(345, 21);
+      this.cmbDatabase.TabIndex = 42;
+      this.cmbDatabase.SelectedIndexChanged += new System.EventHandler(this.cmbDatabase_SelectedIndexChanged);
       // 
       // lblBlackLevel
       // 
@@ -602,27 +625,6 @@
       this.devToolsCroppedPictureBox.Size = new System.Drawing.Size(300, 100);
       this.devToolsCroppedPictureBox.TabIndex = 31;
       this.devToolsCroppedPictureBox.TabStop = false;
-      // 
-      // label12
-      // 
-      this.label12.AutoSize = true;
-      this.label12.Location = new System.Drawing.Point(28, 48);
-      this.label12.Name = "label12";
-      this.label12.Size = new System.Drawing.Size(56, 13);
-      this.label12.TabIndex = 43;
-      this.label12.Text = "Database:";
-      // 
-      // cmbDatabase
-      // 
-      this.cmbDatabase.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-      this.cmbDatabase.FormattingEnabled = true;
-      this.cmbDatabase.Items.AddRange(new object[] {
-            "Full Display (Primary)"});
-      this.cmbDatabase.Location = new System.Drawing.Point(86, 45);
-      this.cmbDatabase.Name = "cmbDatabase";
-      this.cmbDatabase.Size = new System.Drawing.Size(345, 21);
-      this.cmbDatabase.TabIndex = 42;
-      this.cmbDatabase.SelectedIndexChanged += new System.EventHandler(this.cmbDatabase_SelectedIndexChanged);
       // 
       // CTRNitroFueledLoadRemoverSettings
       // 

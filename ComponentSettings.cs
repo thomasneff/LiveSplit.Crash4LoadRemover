@@ -7,6 +7,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
@@ -165,6 +166,15 @@ namespace LiveSplit.UI.Components
           FeatureDetector.listOfFeatureVectorsEng[x, y] = features_temp[x][y];
         }
       }
+
+      FeatureDetector.comparison_indices = new int[len_x];
+
+      for(int i = 0; i < len_x; i++)
+      {
+        FeatureDetector.comparison_indices[i] = i;
+      }
+      Random rnd = new Random();
+      FeatureDetector.comparison_indices = FeatureDetector.comparison_indices.OrderBy(x => rnd.Next()).ToArray();
 
     }
 
@@ -578,8 +588,8 @@ namespace LiveSplit.UI.Components
 				if (element["RequiredMatches"] != null)
 				{
 					FeatureDetector.numberOfBinsCorrect = Convert.ToInt32(element["RequiredMatches"].InnerText);
-					requiredMatchesUpDown.Value = FeatureDetector.numberOfBinsCorrect;
-				}
+					requiredMatchesUpDown.Value = Convert.ToDecimal(FeatureDetector.numberOfBinsCorrect / (float)FeatureDetector.listOfFeatureVectorsEng.GetLength(1));
+        }
 
 				if (element["SelectedCaptureTitle"] != null)
 				{
@@ -871,7 +881,7 @@ namespace LiveSplit.UI.Components
 				lastFeatures = features;
 				lastDiagnosticCapture = capture;
 				lastMatchingBins = tempMatchingBins;
-				matchDisplayLabel.Text = tempMatchingBins.ToString();
+        matchDisplayLabel.Text = Math.Round((Convert.ToSingle(tempMatchingBins) / Convert.ToSingle(FeatureDetector.listOfFeatureVectorsEng.GetLength(1))), 4).ToString();
 			}
 			catch (Exception ex)
 			{
@@ -891,7 +901,7 @@ namespace LiveSplit.UI.Components
 			selectionTopLeft = new Point(0, 0);
 			selectionBottomRight = new Point(previewPictureBox.Width, previewPictureBox.Height);
 			selectionRectanglePreviewBox = new Rectangle(selectionTopLeft.X, selectionTopLeft.Y, selectionBottomRight.X - selectionTopLeft.X, selectionBottomRight.Y - selectionTopLeft.Y);
-			requiredMatchesUpDown.Value = FeatureDetector.numberOfBinsCorrect;
+			requiredMatchesUpDown.Value = Convert.ToDecimal(FeatureDetector.numberOfBinsCorrect / (float)FeatureDetector.listOfFeatureVectorsEng.GetLength(1));
 
 			imageCaptureInfo.featureVectorResolutionX = featureVectorResolutionX;
 			imageCaptureInfo.featureVectorResolutionY = featureVectorResolutionY;
@@ -1033,7 +1043,7 @@ namespace LiveSplit.UI.Components
 
 		private void requiredMatchesUpDown_ValueChanged(object sender, EventArgs e)
 		{
-			FeatureDetector.numberOfBinsCorrect = (int)requiredMatchesUpDown.Value;
+			FeatureDetector.numberOfBinsCorrect = (int)(requiredMatchesUpDown.Value * FeatureDetector.listOfFeatureVectorsEng.GetLength(1));
 		}
 
 		private void saveDiagnosticsButton_Click(object sender, EventArgs e)
@@ -1229,9 +1239,9 @@ namespace LiveSplit.UI.Components
 
       var files = System.IO.Directory.GetFiles(path);
 
-      int[] downsampling_factors = { 1, 2, 4, 8 };
-      int[] pixel_shifts = { -4, 0, 4 };
-      InterpolationMode[] interpolation_modes = { InterpolationMode.Bilinear, InterpolationMode.Bicubic };
+      int[] downsampling_factors = { 1, 2};
+      int[] pixel_shifts = { 0 }; // this does nothing, currently
+      InterpolationMode[] interpolation_modes = { InterpolationMode.NearestNeighbor, InterpolationMode.Bicubic };
 
       foreach (string filename in files)
       {
@@ -1287,7 +1297,7 @@ namespace LiveSplit.UI.Components
 
       }
 
-      SerializeDetectorData(data);
+      SerializeDetectorData(data, new DirectoryInfo(path).Name);
     }
 
     private void devToolsDatabaseButton_Click(object sender, EventArgs e)
@@ -1309,11 +1319,11 @@ namespace LiveSplit.UI.Components
      
     }
 
-    void SerializeDetectorData(DetectorData data)
+    void SerializeDetectorData(DetectorData data, string path_suffix = "")
     {
       IFormatter formatter = new BinaryFormatter();
       System.IO.Directory.CreateDirectory(Path.Combine(DetectionLogFolderName, "SerializedData"));
-      Stream stream = new FileStream(Path.Combine(DetectionLogFolderName, "SerializedData", "LiveSplit.CTRNitroFueledLoadRemover_" + DateTime.Now.ToString("yyyy_MM_dd_HH_mm_ss_fff") + ".ctrnfdata"), FileMode.Create, FileAccess.Write);
+      Stream stream = new FileStream(Path.Combine(DetectionLogFolderName, "SerializedData", "LiveSplit.CTRNitroFueledLoadRemover_" + DateTime.Now.ToString("yyyy_MM_dd_HH_mm_ss_fff") + "_" + path_suffix + ".ctrnfdata"), FileMode.Create, FileAccess.Write);
 
       formatter.Serialize(stream, data);
       stream.Close();

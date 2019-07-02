@@ -21,7 +21,7 @@ namespace LiveSplit.CTRNitroFueledLoadRemover
 
         public string Description
         {
-            get { return "Automatically detects and removes loads (GameTime) for the Crash N Sane Trilogy."; }
+            get { return "Automatically detects and removes loads (GameTime) for Crash Team Racing Nitro Fueled."; }
         }
 
         public IComponent Create(LiveSplitState state)
@@ -41,7 +41,7 @@ namespace LiveSplit.CTRNitroFueledLoadRemover
 
         public Version Version
         {
-            get { return Version.Parse("1.1"); }
+            get { return Version.Parse("1.2"); }
         }
     }
 }

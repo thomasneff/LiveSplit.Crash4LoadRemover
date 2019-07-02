@@ -1,5 +1,22 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <updates>
+  <update version="1.2">
+    <files>
+      <file path="Components/LiveSplit.CTRNitroFueledLoadRemover.dll" status="changed" />
+      <file path="Components/Arabic.ctrnfdata" status="changed" />
+      <file path="Components/English.ctrnfdata" status="changed" />
+      <file path="Components/French.ctrnfdata" status="changed" />
+      <file path="Components/German.ctrnfdata" status="changed" />
+      <file path="Components/Italian.ctrnfdata" status="changed" />
+      <file path="Components/Latin_Spanish.ctrnfdata" status="changed" />
+      <file path="Components/Portuguese.ctrnfdata" status="changed" />
+    </files>
+    <changelog>
+      <change>
+        Added more databases, changed required bins UI to be from 0 to 1, improved detection performance.
+      </change>
+    </changelog>
+  </update>
   <update version="1.1">
     <files>
       <file path="Components/LiveSplit.CTRNitroFueledLoadRemover.dll" status="changed" />
