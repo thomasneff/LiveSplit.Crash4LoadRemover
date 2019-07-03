@@ -16,12 +16,6 @@ namespace CrashNSaneLoadDetector
     //to adapt - if wrongly detected pause, increase match threshold and add wrongly detected runs to list
     public static int[,] listOfFeatureVectorsEng = { { 2500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 } };
 
-
-    // This list stores indices to the comparison database, which will initially be random but then prioritize previously matched features for early-out performance
-    public static int[] comparison_indices = { 1 };
-
-
-
     public static int[,] listOfFeatureVectorsTransition = {
 			{2500,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2500,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2500,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2500,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2500,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2500,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2500,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2500,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2500,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2500,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2500,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2500,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2500,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2500,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2500,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2500,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2500,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2500,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2500,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2500,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2500,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2500,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2500,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2500,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2500,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2500,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2500,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2500,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2500,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2500,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2500,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2500,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2500,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2500,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2500,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2500,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
 			{ 0, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 } };
@@ -66,7 +60,7 @@ namespace CrashNSaneLoadDetector
 			matchingBins = 0;
       int matching = 0;
       int matching_bins_result = 0;
-      Parallel.For(0, comparison_indices.Length,
+      Parallel.For(0, numVectors,
         (vectorIndex, loopState) =>
           {
             int tempMatchingBins = 0;
@@ -109,44 +103,7 @@ namespace CrashNSaneLoadDetector
       matchingBins = matching_bins_result;
       if (matching != 0)
         return true;
-      /*
-			for (int i = 0; i < comparison_indices.Length; i++)
-			{
-        int vectorIndex = comparison_indices[i];
-				int tempMatchingBins = 0;
-        //check if the current feature vector matches one of the stored ones closely enough
-
-				for (int bin = 0; bin < size; bin++)
-				{
-					//Determine upper/lower histogram ranges for matching bins
-					int lower_bound = (int)((comparison_vectors[vectorIndex, bin] / varianceOfBinsAllowedMult) - additiveVariance);
-					int upper_bound = (int)((comparison_vectors[vectorIndex, bin] * varianceOfBinsAllowedMult) + additiveVariance);
-
-					if (newVector[bin] <= upper_bound && newVector[bin] >= lower_bound)
-					{
-						tempMatchingBins++;
-					}
-
-					//If we can not get a possible match anymore, break for speed
-					if (((bin - tempMatchingBins) > (size - numberOfBinsCorrect)) && percentageOfBinsCorrectOverride < 0.0f)
-					{
-						break;
-					}
-				}
-				matchingBins = Math.Max(matchingBins, tempMatchingBins);
-
-				if (matchingBins >= numberOfBinsCorrect)
-				{
-          // if we found enough similarities, we found a match. this will early-out for speed, but possibly report lower matchingBins values
-          // we also swap this comparison index with the first one, to give it priority.
-          //int temp = vectorIndex;
-          //int swap_position = i / 4;
-          // comparison_indices[i] = comparison_indices[swap_position];
-          //comparison_indices[swap_position] = vectorIndex;
-          return true;
-        }
-			}
-      */
+     
 			if (debugOutput)
 			{
 				System.Console.WriteLine("Matching bins: " + matchingBins);
@@ -172,7 +129,97 @@ namespace CrashNSaneLoadDetector
 			return false;
 		}
 
-		public static bool isGameTransition(Bitmap capture, int black_level)
+    public static bool compareFeatureVector(int[] newVector, List<int[]> comparison_vectors, out int matchingBins, float percentageOfBinsCorrectOverride = -1.0f, bool debugOutput = true)
+    {
+      //int[,] comparison_vectors = listOfFeatureVectorsEng;
+      int size = newVector.Length;
+
+      matchingBins = 0;
+
+      if (comparison_vectors.Count == 0)
+        return false;
+
+      if (comparison_vectors[0].Length < size)
+      {
+        size = comparison_vectors[0].Length;
+      }
+
+      //int number_of_bins_needed = 290;// (int) (size * percent_of_bins_correct);
+
+      int numVectors = comparison_vectors.Count;
+
+      int matching = 0;
+      int matching_bins_result = 0;
+      Parallel.For(0, numVectors,
+        (vectorIndex, loopState) =>
+        {
+          int tempMatchingBins = 0;
+          //check if the current feature vector matches one of the stored ones closely enough
+
+          for (int bin = 0; bin < size; bin++)
+          {
+            //Determine upper/lower histogram ranges for matching bins
+            int lower_bound = (int)((comparison_vectors[vectorIndex][bin] / varianceOfBinsAllowedMult) - additiveVariance);
+            int upper_bound = (int)((comparison_vectors[vectorIndex][bin] * varianceOfBinsAllowedMult) + additiveVariance);
+
+            if (newVector[bin] <= upper_bound && newVector[bin] >= lower_bound)
+            {
+              tempMatchingBins++;
+            }
+
+            //If we can not get a possible match anymore, break for speed
+            if (((bin - tempMatchingBins) > (size - numberOfBinsCorrect)) && percentageOfBinsCorrectOverride < 0.0f)
+            {
+              break;
+            }
+          }
+
+
+          if (tempMatchingBins >= numberOfBinsCorrect)
+          {
+            // if we found enough similarities, we found a match. this will early-out for speed, but possibly report lower matchingBins values
+            // we also swap this comparison index with the first one, to give it priority.
+            //int temp = vectorIndex;
+            //int swap_position = i / 4;
+            // comparison_indices[i] = comparison_indices[swap_position];
+            //comparison_indices[swap_position] = vectorIndex;
+            Interlocked.Exchange(ref matching, 1);
+            Interlocked.Exchange(ref matching_bins_result, tempMatchingBins);
+            loopState.Stop();
+          }
+        }
+        );
+
+      matchingBins = matching_bins_result;
+      if (matching != 0)
+        return true;
+
+      if (debugOutput)
+      {
+        System.Console.WriteLine("Matching bins: " + matchingBins);
+      }
+
+      if (matchingBins >= numberOfBinsCorrect && percentageOfBinsCorrectOverride < 0.0f)
+      {
+        //if we found enough similarities, we found a match.
+        return true;
+      }
+
+      if (percentageOfBinsCorrectOverride >= 0.0f)
+      {
+        System.Console.WriteLine("Matching bins (percent): " + (matchingBins / (float)size));
+        System.Console.WriteLine("Required bins (percent): " + percentageOfBinsCorrectOverride);
+      }
+
+      if (percentageOfBinsCorrectOverride >= 0.0f && (matchingBins / (float)size) >= percentageOfBinsCorrectOverride)
+      {
+        return true;
+      }
+
+      return false;
+    }
+
+    public static bool isGameTransition(Bitmap capture, int black_level)
 		{
 			BitmapData bData = capture.LockBits(new Rectangle(0, 0, capture.Width, capture.Height), ImageLockMode.ReadWrite, capture.PixelFormat);
 			int bmpStride = bData.Stride;

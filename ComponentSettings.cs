@@ -167,15 +167,6 @@ namespace LiveSplit.UI.Components
         }
       }
 
-      FeatureDetector.comparison_indices = new int[len_x];
-
-      for(int i = 0; i < len_x; i++)
-      {
-        FeatureDetector.comparison_indices[i] = i;
-      }
-      Random rnd = new Random();
-      FeatureDetector.comparison_indices = FeatureDetector.comparison_indices.OrderBy(x => rnd.Next()).ToArray();
-
     }
 
     public CTRNitroFueledLoadRemoverSettings(LiveSplitState state)
@@ -1089,7 +1080,7 @@ namespace LiveSplit.UI.Components
 				//yeah, silent catch is bad, I don't care
 			}
 		}
-
+    
 		private void SetRectangleFromMouse(MouseEventArgs e)
 		{
 			//Clamp values to pictureBox range
@@ -1107,7 +1098,21 @@ namespace LiveSplit.UI.Components
 				selectionBottomRight = new Point(x, y);
 			}
 
-			selectionRectanglePreviewBox = new Rectangle(selectionTopLeft.X, selectionTopLeft.Y, selectionBottomRight.X - selectionTopLeft.X, selectionBottomRight.Y - selectionTopLeft.Y);
+      do_not_trigger_value_changed = true;
+      numTopLeftRectY.Value = selectionTopLeft.Y;
+
+      do_not_trigger_value_changed = true;
+      numTopLeftRectX.Value = selectionTopLeft.X;
+
+      do_not_trigger_value_changed = true;
+      numBottomRightRectY.Value = selectionBottomRight.Y;
+
+      do_not_trigger_value_changed = true;
+      numBottomRightRectX.Value = selectionBottomRight.X;
+
+
+
+      selectionRectanglePreviewBox = new Rectangle(selectionTopLeft.X, selectionTopLeft.Y, selectionBottomRight.X - selectionTopLeft.X, selectionBottomRight.Y - selectionTopLeft.Y);
 		}
 
 		private XmlElement ToElement<T>(XmlDocument document, String name, T value)
@@ -1205,23 +1210,8 @@ namespace LiveSplit.UI.Components
 
     private bool IsFeatureUnique(DetectorData data, int[] feature)
     {
-      foreach(int[] data_feature in data.features)
-      {
-        bool identical = true;
-        for(int i = 0; i < data_feature.Length; i++)
-        {
-          if (data_feature[i] != feature[i])
-          {
-            identical = false;
-            break;
-          }
-        }
-
-        if (identical)
-          return false;
-      }
-
-      return true;
+      int tempMatchingBins;
+      return !FeatureDetector.compareFeatureVector(feature, data.features, out tempMatchingBins, -1.0f, false);
     }
 
 
@@ -1239,58 +1229,85 @@ namespace LiveSplit.UI.Components
 
       var files = System.IO.Directory.GetFiles(path);
 
-      int[] downsampling_factors = { 1, 2};
-      int[] pixel_shifts = { 0 }; // this does nothing, currently
+      float[] downsampling_factors = { 1, 2, 3};
+      float[] brightness_values = { 1.0f, 0.9f, 1.1f };
+      float[] contrast_values = { 1.0f, 0.9f, 1.1f };
       InterpolationMode[] interpolation_modes = { InterpolationMode.NearestNeighbor, InterpolationMode.Bicubic };
+
+      int previous_matching_bins = FeatureDetector.numberOfBinsCorrect;
+      FeatureDetector.numberOfBinsCorrect = 400;
 
       foreach (string filename in files)
       {
 
-        foreach (int downsampling_factor in downsampling_factors)
+        foreach (float downsampling_factor in downsampling_factors)
         {
-          foreach (int pixel_shift in pixel_shifts)
+          foreach (float brightness in brightness_values)
           {
-            foreach (InterpolationMode interpolation_mode in interpolation_modes)
+            foreach (float contrast in contrast_values)
             {
-              Bitmap bmp = new Bitmap(filename);
-
-              //Make 32 bit ARGB bitmap
-              Bitmap clone = new Bitmap(bmp.Width, bmp.Height,
-                System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-
-              //Make 32 bit ARGB bitmap
-              Bitmap sample_factor_clone = new Bitmap(bmp.Width / downsampling_factor, bmp.Height / downsampling_factor,
-                System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-
-              using (Graphics gr = Graphics.FromImage(sample_factor_clone))
+              foreach (InterpolationMode interpolation_mode in interpolation_modes)
               {
-                gr.InterpolationMode = interpolation_mode;
-                gr.DrawImage(bmp, new Rectangle(0, 0, sample_factor_clone.Width, sample_factor_clone.Height));
+                
+                float gamma = 1.0f; // no change in gamma
+
+                float adjustedBrightness = brightness - 1.0f;
+                // create matrix that will brighten and contrast the image
+                // https://stackoverflow.com/a/15408608
+                float[][] ptsArray = {
+                  new float[] {contrast, 0, 0, 0, 0}, // scale red
+                  new float[] {0, contrast, 0, 0, 0}, // scale green
+                  new float[] {0, 0, contrast, 0, 0}, // scale blue
+                  new float[] {0, 0, 0, 1.0f, 0}, // don't scale alpha
+                  new float[] {adjustedBrightness, adjustedBrightness, adjustedBrightness, 0, 1}};
+
+                Bitmap bmp = new Bitmap(filename);
+
+                //Make 32 bit ARGB bitmap
+                Bitmap clone = new Bitmap(bmp.Width, bmp.Height,
+                  System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+
+                //Make 32 bit ARGB bitmap
+                Bitmap sample_factor_clone = new Bitmap(Convert.ToInt32(bmp.Width / downsampling_factor), Convert.ToInt32(bmp.Height / downsampling_factor),
+                  System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+
+                var attributes = new ImageAttributes();
+                attributes.SetWrapMode(WrapMode.TileFlipXY);
+
+
+                using (Graphics gr = Graphics.FromImage(sample_factor_clone))
+                {
+                  gr.InterpolationMode = interpolation_mode;
+                  gr.DrawImage(bmp, new Rectangle(0, 0, sample_factor_clone.Width, sample_factor_clone.Height), 0, 0, bmp.Width, bmp.Height, GraphicsUnit.Pixel, attributes);
+                }
+
+                attributes.ClearColorMatrix();
+                attributes.SetColorMatrix(new ColorMatrix(ptsArray), ColorMatrixFlag.Default, ColorAdjustType.Bitmap);
+                attributes.SetGamma(gamma, ColorAdjustType.Bitmap);
+
+                using (Graphics gr = Graphics.FromImage(clone))
+                {
+                  gr.InterpolationMode = interpolation_mode;
+                  gr.DrawImage(sample_factor_clone, new Rectangle(0, 0, clone.Width, clone.Height), 0, 0, sample_factor_clone.Width, sample_factor_clone.Height, GraphicsUnit.Pixel, attributes);
+                }
+
+                int black_level = 0;
+                List<int> max_per_patch = new List<int>();
+                List<int> min_per_patch = new List<int>();
+                int[] feature = FeatureDetector.featuresFromBitmap(clone, out max_per_patch, out black_level, out min_per_patch).ToArray();
+
+                if (IsFeatureUnique(data, feature))
+                {
+                  data.features.Add(feature);
+                }
+
+
+                bmp.Dispose();
+                clone.Dispose();
+                sample_factor_clone.Dispose();
               }
-
-              using (Graphics gr = Graphics.FromImage(clone))
-              {
-                gr.InterpolationMode = interpolation_mode;
-                gr.DrawImage(sample_factor_clone, new Rectangle(0, 0, clone.Width, clone.Height));
-              }
-
-              int black_level = 0;
-              List<int> max_per_patch = new List<int>();
-              List<int> min_per_patch = new List<int>();
-              int[] feature = FeatureDetector.featuresFromBitmap(clone, out max_per_patch, out black_level, out min_per_patch).ToArray();
-
-              if(IsFeatureUnique(data, feature))
-              {
-                data.features.Add(feature);
-              }
-                                       
-
-              bmp.Dispose();
-              clone.Dispose();
-              sample_factor_clone.Dispose();
             }
           }
-
 
         }
 
@@ -1298,6 +1315,7 @@ namespace LiveSplit.UI.Components
       }
 
       SerializeDetectorData(data, new DirectoryInfo(path).Name);
+      FeatureDetector.numberOfBinsCorrect = previous_matching_bins;
     }
 
     private void devToolsDatabaseButton_Click(object sender, EventArgs e)
@@ -1347,6 +1365,49 @@ namespace LiveSplit.UI.Components
     private void trackBar1_Scroll(object sender, EventArgs e)
     {
 
+    }
+
+    bool do_not_trigger_value_changed = false;
+
+    private void numericUpDown4_ValueChanged(object sender, EventArgs e)
+    {
+      if (do_not_trigger_value_changed == false)
+      {
+        SetRectangleFromMouse(new MouseEventArgs(MouseButtons.Left, 1, Convert.ToInt32(numTopLeftRectX.Value), Convert.ToInt32(numTopLeftRectY.Value), 0));
+        DrawPreview();
+      }
+      do_not_trigger_value_changed = false;
+    }
+
+    private void numericUpDown3_ValueChanged(object sender, EventArgs e)
+    {
+      if (do_not_trigger_value_changed == false)
+      {
+        SetRectangleFromMouse(new MouseEventArgs(MouseButtons.Left, 1, Convert.ToInt32(numTopLeftRectX.Value), Convert.ToInt32(numTopLeftRectY.Value), 0));
+        DrawPreview();
+      }
+      do_not_trigger_value_changed = false;
+    }
+
+    private void numericUpDown2_ValueChanged(object sender, EventArgs e)
+    {
+      if (do_not_trigger_value_changed == false)
+      {
+        SetRectangleFromMouse(new MouseEventArgs(MouseButtons.Right, 1, Convert.ToInt32(numBottomRightRectX.Value), Convert.ToInt32(numBottomRightRectY.Value), 0));
+        DrawPreview();
+      }
+      do_not_trigger_value_changed = false;
+    }
+
+    private void numericUpDown1_ValueChanged(object sender, EventArgs e)
+    {
+      if (do_not_trigger_value_changed == false)
+      {
+        SetRectangleFromMouse(new MouseEventArgs(MouseButtons.Right, 1, Convert.ToInt32(numBottomRightRectX.Value), Convert.ToInt32(numBottomRightRectY.Value), 0));
+        DrawPreview();
+      }
+
+      do_not_trigger_value_changed = false;
     }
   }
 

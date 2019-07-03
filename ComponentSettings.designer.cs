@@ -46,6 +46,7 @@
       this.updatePreviewButton = new System.Windows.Forms.Button();
       this.tabControl1 = new System.Windows.Forms.TabControl();
       this.tabPage1 = new System.Windows.Forms.TabPage();
+      this.panel2 = new System.Windows.Forms.Panel();
       this.label12 = new System.Windows.Forms.Label();
       this.cmbDatabase = new System.Windows.Forms.ComboBox();
       this.lblBlackLevel = new System.Windows.Forms.Label();
@@ -71,6 +72,18 @@
       this.devToolsCropX = new System.Windows.Forms.NumericUpDown();
       this.label7 = new System.Windows.Forms.Label();
       this.devToolsCroppedPictureBox = new System.Windows.Forms.PictureBox();
+      this.label13 = new System.Windows.Forms.Label();
+      this.numBottomRightRectY = new System.Windows.Forms.NumericUpDown();
+      this.label14 = new System.Windows.Forms.Label();
+      this.numBottomRightRectX = new System.Windows.Forms.NumericUpDown();
+      this.label15 = new System.Windows.Forms.Label();
+      this.panel3 = new System.Windows.Forms.Panel();
+      this.label16 = new System.Windows.Forms.Label();
+      this.label17 = new System.Windows.Forms.Label();
+      this.numTopLeftRectY = new System.Windows.Forms.NumericUpDown();
+      this.label18 = new System.Windows.Forms.Label();
+      this.numTopLeftRectX = new System.Windows.Forms.NumericUpDown();
+      this.label19 = new System.Windows.Forms.Label();
       ((System.ComponentModel.ISupportInitialize)(this.previewPictureBox)).BeginInit();
       ((System.ComponentModel.ISupportInitialize)(this.croppedPreviewPictureBox)).BeginInit();
       ((System.ComponentModel.ISupportInitialize)(this.trackBar1)).BeginInit();
@@ -78,11 +91,17 @@
       this.panel1.SuspendLayout();
       this.tabControl1.SuspendLayout();
       this.tabPage1.SuspendLayout();
+      this.panel2.SuspendLayout();
       this.tabPage2.SuspendLayout();
       this.tabPage3.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)(this.devToolsCropY)).BeginInit();
       ((System.ComponentModel.ISupportInitialize)(this.devToolsCropX)).BeginInit();
       ((System.ComponentModel.ISupportInitialize)(this.devToolsCroppedPictureBox)).BeginInit();
+      ((System.ComponentModel.ISupportInitialize)(this.numBottomRightRectY)).BeginInit();
+      ((System.ComponentModel.ISupportInitialize)(this.numBottomRightRectX)).BeginInit();
+      this.panel3.SuspendLayout();
+      ((System.ComponentModel.ISupportInitialize)(this.numTopLeftRectY)).BeginInit();
+      ((System.ComponentModel.ISupportInitialize)(this.numTopLeftRectX)).BeginInit();
       this.SuspendLayout();
       // 
       // lblVersion
@@ -97,6 +116,7 @@
       this.lblVersion.TabIndex = 21;
       this.lblVersion.Text = "v0.0.0";
       this.lblVersion.TextAlign = System.Drawing.ContentAlignment.TopRight;
+      this.lblVersion.Visible = false;
       // 
       // processListComboBox
       // 
@@ -297,6 +317,9 @@
       // tabPage1
       // 
       this.tabPage1.BackColor = System.Drawing.SystemColors.Control;
+      this.tabPage1.Controls.Add(this.label19);
+      this.tabPage1.Controls.Add(this.panel3);
+      this.tabPage1.Controls.Add(this.panel2);
       this.tabPage1.Controls.Add(this.label12);
       this.tabPage1.Controls.Add(this.cmbDatabase);
       this.tabPage1.Controls.Add(this.lblBlackLevel);
@@ -318,6 +341,20 @@
       this.tabPage1.Size = new System.Drawing.Size(468, 506);
       this.tabPage1.TabIndex = 0;
       this.tabPage1.Text = "Setup";
+      // 
+      // panel2
+      // 
+      this.panel2.BackColor = System.Drawing.SystemColors.Control;
+      this.panel2.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+      this.panel2.Controls.Add(this.label15);
+      this.panel2.Controls.Add(this.label13);
+      this.panel2.Controls.Add(this.numBottomRightRectY);
+      this.panel2.Controls.Add(this.label14);
+      this.panel2.Controls.Add(this.numBottomRightRectX);
+      this.panel2.Location = new System.Drawing.Point(339, 444);
+      this.panel2.Name = "panel2";
+      this.panel2.Size = new System.Drawing.Size(115, 56);
+      this.panel2.TabIndex = 39;
       // 
       // label12
       // 
@@ -628,6 +665,165 @@
       this.devToolsCroppedPictureBox.TabIndex = 31;
       this.devToolsCroppedPictureBox.TabStop = false;
       // 
+      // label13
+      // 
+      this.label13.Anchor = System.Windows.Forms.AnchorStyles.None;
+      this.label13.AutoSize = true;
+      this.label13.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+      this.label13.Location = new System.Drawing.Point(76, 14);
+      this.label13.Name = "label13";
+      this.label13.Size = new System.Drawing.Size(17, 16);
+      this.label13.TabIndex = 43;
+      this.label13.Text = "Y";
+      // 
+      // numBottomRightRectY
+      // 
+      this.numBottomRightRectY.Anchor = System.Windows.Forms.AnchorStyles.None;
+      this.numBottomRightRectY.Location = new System.Drawing.Point(65, 31);
+      this.numBottomRightRectY.Maximum = new decimal(new int[] {
+            180,
+            0,
+            0,
+            0});
+      this.numBottomRightRectY.Name = "numBottomRightRectY";
+      this.numBottomRightRectY.Size = new System.Drawing.Size(42, 20);
+      this.numBottomRightRectY.TabIndex = 44;
+      this.numBottomRightRectY.Value = new decimal(new int[] {
+            180,
+            0,
+            0,
+            0});
+      this.numBottomRightRectY.ValueChanged += new System.EventHandler(this.numericUpDown1_ValueChanged);
+      // 
+      // label14
+      // 
+      this.label14.Anchor = System.Windows.Forms.AnchorStyles.None;
+      this.label14.AutoSize = true;
+      this.label14.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+      this.label14.Location = new System.Drawing.Point(22, 14);
+      this.label14.Name = "label14";
+      this.label14.Size = new System.Drawing.Size(16, 16);
+      this.label14.TabIndex = 41;
+      this.label14.Text = "X";
+      // 
+      // numBottomRightRectX
+      // 
+      this.numBottomRightRectX.Anchor = System.Windows.Forms.AnchorStyles.None;
+      this.numBottomRightRectX.Location = new System.Drawing.Point(11, 31);
+      this.numBottomRightRectX.Maximum = new decimal(new int[] {
+            400,
+            0,
+            0,
+            0});
+      this.numBottomRightRectX.Name = "numBottomRightRectX";
+      this.numBottomRightRectX.Size = new System.Drawing.Size(42, 20);
+      this.numBottomRightRectX.TabIndex = 42;
+      this.numBottomRightRectX.Value = new decimal(new int[] {
+            400,
+            0,
+            0,
+            0});
+      this.numBottomRightRectX.ValueChanged += new System.EventHandler(this.numericUpDown2_ValueChanged);
+      // 
+      // label15
+      // 
+      this.label15.Anchor = System.Windows.Forms.AnchorStyles.None;
+      this.label15.AutoSize = true;
+      this.label15.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+      this.label15.Location = new System.Drawing.Point(11, 0);
+      this.label15.Name = "label15";
+      this.label15.Size = new System.Drawing.Size(96, 16);
+      this.label15.TabIndex = 45;
+      this.label15.Text = "Bottom Right";
+      this.label15.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+      // 
+      // panel3
+      // 
+      this.panel3.BackColor = System.Drawing.SystemColors.Control;
+      this.panel3.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+      this.panel3.Controls.Add(this.label16);
+      this.panel3.Controls.Add(this.label17);
+      this.panel3.Controls.Add(this.numTopLeftRectY);
+      this.panel3.Controls.Add(this.label18);
+      this.panel3.Controls.Add(this.numTopLeftRectX);
+      this.panel3.Location = new System.Drawing.Point(339, 382);
+      this.panel3.Name = "panel3";
+      this.panel3.Size = new System.Drawing.Size(115, 56);
+      this.panel3.TabIndex = 46;
+      // 
+      // label16
+      // 
+      this.label16.Anchor = System.Windows.Forms.AnchorStyles.None;
+      this.label16.AutoSize = true;
+      this.label16.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+      this.label16.Location = new System.Drawing.Point(25, 0);
+      this.label16.Name = "label16";
+      this.label16.Size = new System.Drawing.Size(65, 16);
+      this.label16.TabIndex = 45;
+      this.label16.Text = "Top Left";
+      this.label16.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+      // 
+      // label17
+      // 
+      this.label17.Anchor = System.Windows.Forms.AnchorStyles.None;
+      this.label17.AutoSize = true;
+      this.label17.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+      this.label17.Location = new System.Drawing.Point(76, 14);
+      this.label17.Name = "label17";
+      this.label17.Size = new System.Drawing.Size(17, 16);
+      this.label17.TabIndex = 43;
+      this.label17.Text = "Y";
+      // 
+      // numTopLeftRectY
+      // 
+      this.numTopLeftRectY.Anchor = System.Windows.Forms.AnchorStyles.None;
+      this.numTopLeftRectY.Location = new System.Drawing.Point(65, 31);
+      this.numTopLeftRectY.Maximum = new decimal(new int[] {
+            180,
+            0,
+            0,
+            0});
+      this.numTopLeftRectY.Name = "numTopLeftRectY";
+      this.numTopLeftRectY.Size = new System.Drawing.Size(42, 20);
+      this.numTopLeftRectY.TabIndex = 44;
+      this.numTopLeftRectY.ValueChanged += new System.EventHandler(this.numericUpDown3_ValueChanged);
+      // 
+      // label18
+      // 
+      this.label18.Anchor = System.Windows.Forms.AnchorStyles.None;
+      this.label18.AutoSize = true;
+      this.label18.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+      this.label18.Location = new System.Drawing.Point(22, 14);
+      this.label18.Name = "label18";
+      this.label18.Size = new System.Drawing.Size(16, 16);
+      this.label18.TabIndex = 41;
+      this.label18.Text = "X";
+      // 
+      // numTopLeftRectX
+      // 
+      this.numTopLeftRectX.Anchor = System.Windows.Forms.AnchorStyles.None;
+      this.numTopLeftRectX.Location = new System.Drawing.Point(11, 31);
+      this.numTopLeftRectX.Maximum = new decimal(new int[] {
+            400,
+            0,
+            0,
+            0});
+      this.numTopLeftRectX.Name = "numTopLeftRectX";
+      this.numTopLeftRectX.Size = new System.Drawing.Size(42, 20);
+      this.numTopLeftRectX.TabIndex = 42;
+      this.numTopLeftRectX.ValueChanged += new System.EventHandler(this.numericUpDown4_ValueChanged);
+      // 
+      // label19
+      // 
+      this.label19.AutoSize = true;
+      this.label19.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+      this.label19.Location = new System.Drawing.Point(339, 363);
+      this.label19.Name = "label19";
+      this.label19.Size = new System.Drawing.Size(116, 16);
+      this.label19.TabIndex = 47;
+      this.label19.Text = "Crop Rectangle";
+      this.label19.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+      // 
       // CTRNitroFueledLoadRemoverSettings
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -645,6 +841,8 @@
       this.tabControl1.ResumeLayout(false);
       this.tabPage1.ResumeLayout(false);
       this.tabPage1.PerformLayout();
+      this.panel2.ResumeLayout(false);
+      this.panel2.PerformLayout();
       this.tabPage2.ResumeLayout(false);
       this.tabPage2.PerformLayout();
       this.tabPage3.ResumeLayout(false);
@@ -652,6 +850,12 @@
       ((System.ComponentModel.ISupportInitialize)(this.devToolsCropY)).EndInit();
       ((System.ComponentModel.ISupportInitialize)(this.devToolsCropX)).EndInit();
       ((System.ComponentModel.ISupportInitialize)(this.devToolsCroppedPictureBox)).EndInit();
+      ((System.ComponentModel.ISupportInitialize)(this.numBottomRightRectY)).EndInit();
+      ((System.ComponentModel.ISupportInitialize)(this.numBottomRightRectX)).EndInit();
+      this.panel3.ResumeLayout(false);
+      this.panel3.PerformLayout();
+      ((System.ComponentModel.ISupportInitialize)(this.numTopLeftRectY)).EndInit();
+      ((System.ComponentModel.ISupportInitialize)(this.numTopLeftRectX)).EndInit();
       this.ResumeLayout(false);
 
 		}
@@ -700,5 +904,18 @@
     private System.Windows.Forms.Button devToolsDataBaseFromCaptureImages;
     private System.Windows.Forms.Label label12;
     private System.Windows.Forms.ComboBox cmbDatabase;
+    private System.Windows.Forms.Panel panel2;
+    private System.Windows.Forms.Panel panel3;
+    private System.Windows.Forms.Label label16;
+    private System.Windows.Forms.Label label17;
+    private System.Windows.Forms.Label label18;
+    private System.Windows.Forms.NumericUpDown numTopLeftRectX;
+    private System.Windows.Forms.Label label15;
+    private System.Windows.Forms.Label label13;
+    private System.Windows.Forms.NumericUpDown numBottomRightRectY;
+    private System.Windows.Forms.Label label14;
+    private System.Windows.Forms.NumericUpDown numBottomRightRectX;
+    private System.Windows.Forms.Label label19;
+    private System.Windows.Forms.NumericUpDown numTopLeftRectY;
   }
 }
