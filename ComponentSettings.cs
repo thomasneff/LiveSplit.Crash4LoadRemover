@@ -1344,6 +1344,10 @@ namespace LiveSplit.UI.Components
       ComputeDatabaseFromPath(Path.Combine(DetectionLogFolderName, devToolsCaptureImageText.Text));
     }
 
+    private void trackBar1_Scroll(object sender, EventArgs e)
+    {
+
+    }
   }
 
   [Serializable]

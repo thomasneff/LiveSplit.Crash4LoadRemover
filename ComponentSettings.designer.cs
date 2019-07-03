@@ -171,6 +171,7 @@
       this.croppedPreviewPictureBox.Location = new System.Drawing.Point(30, 365);
       this.croppedPreviewPictureBox.Name = "croppedPreviewPictureBox";
       this.croppedPreviewPictureBox.Size = new System.Drawing.Size(300, 135);
+      this.croppedPreviewPictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
       this.croppedPreviewPictureBox.TabIndex = 29;
       this.croppedPreviewPictureBox.TabStop = false;
       // 
@@ -197,6 +198,7 @@
       this.trackBar1.TabIndex = 31;
       this.trackBar1.TickFrequency = 25;
       this.trackBar1.Value = 100;
+      this.trackBar1.Scroll += new System.EventHandler(this.trackBar1_Scroll);
       this.trackBar1.ValueChanged += new System.EventHandler(this.trackBar1_ValueChanged);
       // 
       // matchDisplayLabel
