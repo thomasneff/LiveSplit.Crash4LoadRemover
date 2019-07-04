@@ -24,8 +24,27 @@ The following screens show how it would be correctly set up:
 ![Compare Against GameTime](compare_against_gametime.png "Compare Against GameTime")
 
 
-About the "Scaling" setting: You should only need to change this if you have the Display Scaling set in Windows. (Display Settings -> "Change Size of text, apps and other items"). Otherwise you can leave this at 100%.
+# Common Issues / Guidelines when setting up
 
+Here is a short list of things that you should do and common issues when setting this thing up:
+
+- Make sure that the window/source you're capturing the game from is as large as possible. I know the whole "capturing from OBS" is not ideal, but please try to keep the game footage as large as possible for best results.
+
+- Make sure that your game footage aspect ratio (that is the ratio between width and height of the game) is 16:9, which is the default/raw game footage. Do not squish/distort it in any way, for example in OBS, this WILL lead to worse detection performance!
+
+- Choose the correct language database in the layout settings. 
+
+- Make sure that the pink capture rectangle captures the game footage as close as possible. You can use the "Crop Rectangle" up/down UI elements to precisely position your crop rectangle. A better crop means better load remover performance.
+
+- If you're capturing from a window, you must not minimize the window. Ideally, maximize it (for larger game footage size!) and just put your other stuff over it if you want to have it "hidden" from view. The only condition is that you must not minimize the window.
+
+- You need to compare to "Game Time". This is easily set by right-clicking LiveSplit, selecting "Compare Against" and ticking "Game Time". Be careful that you don't have your Timer in your LiveSplit layout set to "Real Time", because this will override this setting.
+- The default threshold of ~0.57 is already pretty low. If you followed all of the rules above (large capture region, aspect ratio, good crop), you should not need to lower the threshold. I don't have enough data to reliably predict when a threshold is too low, but consider a threshold lower than 0.5 to be problematic. This can potentially lead to loads being detected during normal gameplay, which will lead to headaches for leaderboard mods, as this would be an unfair advantage if undetected.
+  If you find you require a threshold that is lower than this, please send me a link to a VOD/YouTube vid plus a screenshot of your Load Remover layout settings so that I can investigate and potentially improve the load remover databases for everyone. 
+
+- The load remover is still very much in its early phase, and I need feedback and problematic game footage to improve the databases. I'm not sure how reliably it currently works overall. I seem to encounter no issues on most game footage, even when it's pretty small.
+
+- About the "Scaling" setting: You should only need to change this if you have the Display Scaling set in Windows. (Display Settings -> "Change Size of text, apps and other items"). Otherwise you can leave this at 100%.
 
 
 # LiveSplit.CrashNSTLoadRemoval
