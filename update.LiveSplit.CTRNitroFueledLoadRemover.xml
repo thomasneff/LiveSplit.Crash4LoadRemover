@@ -1,5 +1,15 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <updates>
+  <update version="1.5">
+    <files>
+      <file path="Components/LiveSplit.CTRNitroFueledLoadRemover.dll" status="changed" />
+    </files>
+    <changelog>
+      <change>
+        Improved performance when capturing non-16-by-9 footage.
+      </change>
+    </changelog>
+  </update>
   <update version="1.4">
     <files>
       <file path="Components/LiveSplit.CTRNitroFueledLoadRemover.dll" status="changed" />

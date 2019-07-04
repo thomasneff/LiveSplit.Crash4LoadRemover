@@ -97,8 +97,8 @@ namespace CrashNSaneLoadDetector
 
 				//Compute space occupied by black border relative to total width
 				var adjust_factor = ((float)(device_width - black_bar_width_total) / (float)device_width);
-				info.actual_crop_size_x *= adjust_factor;
-				info.actual_offset_x *= adjust_factor;
+				//info.actual_crop_size_x *= adjust_factor;
+				//info.actual_offset_x *= adjust_factor;
 			}
 			else
 			{
@@ -110,8 +110,8 @@ namespace CrashNSaneLoadDetector
 
 				//Compute space occupied by black border relative to total width
 				var adjust_factor = ((float)(device_height - black_bar_height_total) / (float)device_height);
-				info.actual_crop_size_y *= adjust_factor;
-				info.actual_offset_y *= adjust_factor;
+				//info.actual_crop_size_y *= adjust_factor;
+				//info.actual_offset_y *= adjust_factor;
 			}
 
 
