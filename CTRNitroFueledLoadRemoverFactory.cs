@@ -41,7 +41,7 @@ namespace LiveSplit.CTRNitroFueledLoadRemover
 
         public Version Version
         {
-            get { return Version.Parse("1.5"); }
+            get { return Version.Parse("1.6"); }
         }
     }
 }

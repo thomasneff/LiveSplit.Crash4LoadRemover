@@ -1230,12 +1230,12 @@ namespace LiveSplit.UI.Components
       var files = System.IO.Directory.GetFiles(path);
 
       float[] downsampling_factors = { 1, 2, 3};
-      float[] brightness_values = { 1.0f, 0.9f, 1.1f };
-      float[] contrast_values = { 1.0f, 0.9f, 1.1f };
+      float[] brightness_values = { 1.0f, 0.97f, 1.03f };
+      float[] contrast_values = { 1.0f, 0.97f, 1.03f };
       InterpolationMode[] interpolation_modes = { InterpolationMode.NearestNeighbor, InterpolationMode.Bicubic };
 
       int previous_matching_bins = FeatureDetector.numberOfBinsCorrect;
-      FeatureDetector.numberOfBinsCorrect = 400;
+      FeatureDetector.numberOfBinsCorrect = 420;
 
       foreach (string filename in files)
       {
