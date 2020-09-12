@@ -1,8 +1,8 @@
 # How to set it up
 
-Extract the .zip into your LiveSplit/Components folder, such that it contains all .ctrnfdata files and LiveSplit.CTRNitroFueledLoadRemover.dll.
+Extract the .zip into your LiveSplit/Components folder, such that it contains all .crash4data files and LiveSplit.Crash4LoadRemover.dll.
 
-Add this to LiveSplit by going into your Layout Editor -> Add -> Control -> CTRNitroFueledLoadRemover.
+Add this to LiveSplit by going into your Layout Editor -> Add -> Control -> Crash4LoadRemover.
 
 You can then configure your capture settings (window/display) and capture region within the component settings in the Layout Settings.
 
@@ -39,26 +39,23 @@ Here is a short list of things that you should do and common issues when setting
 - If you're capturing from a window, you must not minimize the window. Ideally, maximize it (for larger game footage size!) and just put your other stuff over it if you want to have it "hidden" from view. The only condition is that you must not minimize the window.
 
 - You need to compare to "Game Time". This is easily set by right-clicking LiveSplit, selecting "Compare Against" and ticking "Game Time". Be careful that you don't have your Timer in your LiveSplit layout set to "Real Time", because this will override this setting.
-- The default threshold of ~0.57 is already pretty low. If you followed all of the rules above (large capture region, aspect ratio, good crop), you should not need to lower the threshold. I don't have enough data to reliably predict when a threshold is too low, but consider a threshold lower than 0.5 to be problematic. This can potentially lead to loads being detected during normal gameplay, which will lead to headaches for leaderboard mods, as this would be an unfair advantage if undetected.
+- The default threshold of ~0.7 is already pretty low. If you followed all of the rules above (large capture region, aspect ratio, good crop), you should not need to lower the threshold. I don't have enough data to reliably predict when a threshold is too low, but consider a threshold lower than 0.5 to be problematic. This can potentially lead to loads being detected during normal gameplay, which will lead to headaches for leaderboard mods, as this would be an unfair advantage if undetected.
   If you find you require a threshold that is lower than this, please send me a link to a VOD/YouTube vid plus a screenshot of your Load Remover layout settings so that I can investigate and potentially improve the load remover databases for everyone. 
 
 - The load remover is still very much in its early phase, and I need feedback and problematic game footage to improve the databases. I'm not sure how reliably it currently works overall. I seem to encounter no issues on most game footage, even when it's pretty small.
 
 - About the "Scaling" setting: You should only need to change this if you have the Display Scaling set in Windows. (Display Settings -> "Change Size of text, apps and other items"). Otherwise you can leave this at 100%.
 
+- This might not work for windows with DirectX/OpenGL surfaces, nothing I can do about that. (Use Display capture for those cases, sorry, although even that might not work in some cases). In those cases, you will probably get a black image in the capture preview in the component settings.
 
-# LiveSplit.CrashNSTLoadRemoval
-LiveSplit component to automatically detect and remove loads from Crash Team Racing: Nitro Fueled.
 
-This is adapted from my Crash NST vision-based load remover: https://github.com/thomasneff/LiveSplit.CrashNSTLoadRemoval
+# LiveSplit.Crash4LoadRemover
+LiveSplit component to automatically detect and remove loads from "Crash Bandicoot 4: It's About Time".
+
+This is adapted from my Crash NST and Crash Team Racing: Nitro Fueled vision-based load removers: 
+
+https://github.com/thomasneff/LiveSplit.CrashNSTLoadRemoval 
+
+https://github.com/thomasneff/LiveSplit.CTRNitroFueledLoadRemover
+
 and from https://github.com/Maschell/LiveSplit.PokemonRedBlue for the base component code.
-
-# Settings
-The files LiveSplit.CTRNitroFueledLoadRemover.dll as well as LiveSplit.CTRNitroFueledLoadRemover.data go into your "Components" folder in your LiveSplit folder.
-
-Add this to LiveSplit by going into your Layout Editor -> Add -> Control -> CTRNitroFueledLoadRemover.
-
-You can specify to capture either the full primary Display (default) or an open window. This window has to be open (not minimized) but does not have to be in the foreground.
-
-This might not work for windows with DirectX/OpenGL surfaces, nothing I can do about that. (Use Display capture for those cases, sorry, although even that might not work in some cases). In those cases, you will probably get a black image in the capture preview in the component settings.
-

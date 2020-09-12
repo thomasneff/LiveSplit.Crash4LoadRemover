@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<updates>
+  <update version="1.0">
+    <files>
+      <file path="Components/LiveSplit.Crash4LoadRemover.dll" status="changed" />
+      <file path="Components/first_test_youtube_video_demo.crash4data" status="changed" />
+    </files>
+    <changelog>
+      <change>
+        Initial version of the "Crash Bandicoot 4: It's About Time" load remover. 
+		This is currently very experimental and was only tested with very short clips of recorded demo footage on youtube. 
+		It will need more data to be more robust, but the core (feature settings, feature crop) should be good. 
+      </change>
+    </changelog>
+  </update>
+</updates>

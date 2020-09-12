@@ -4,12 +4,12 @@ using System.Runtime.InteropServices;
 // Allgemeine Informationen über eine Assembly werden über die folgenden 
 // Attribute gesteuert. Ändern Sie diese Attributwerte, um die Informationen zu ändern,
 // die mit einer Assembly verknüpft sind.
-[assembly: AssemblyTitle("LiveSplit.CTRNitroFueledLoadRemover")]
-[assembly: AssemblyDescription("Load Remover for CTR Nitro Fueled")]
+[assembly: AssemblyTitle("LiveSplit.Crash4LoadRemover")]
+[assembly: AssemblyDescription("Load Remover for Crash Bandicoot 4: It's About Time")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("LiveSplit.CTRNitroFueledLoadRemover")]
-[assembly: AssemblyCopyright("Copyright © Thomas Neff 2019")]
+[assembly: AssemblyProduct("LiveSplit.Crash4LoadRemover")]
+[assembly: AssemblyCopyright("Copyright © Thomas Neff 2020")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -19,7 +19,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // Die folgende GUID bestimmt die ID der Typbibliothek, wenn dieses Projekt für COM verfügbar gemacht wird
-[assembly: Guid("061b2495-8a79-4928-a725-9a2c7005f5bc")]
+[assembly: Guid("4c6f9aa5-df3f-4e1c-95c5-2233878bb57c")]
 //[assembly: Guid("5d6847c2-707f-4727-9942-ee14de5334ce")]
 
 // Versionsinformationen für eine Assembly bestehen aus den folgenden vier Werten:
@@ -32,5 +32,5 @@ using System.Runtime.InteropServices;
 // Sie können alle Werte angeben oder die standardmäßigen Build- und Revisionsnummern 
 // übernehmen, indem Sie "*" eingeben:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.6.0.0")]
-[assembly: AssemblyFileVersion("1.6.0.0")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
