@@ -9,6 +9,16 @@ using System.Drawing.Imaging;
 
 namespace LiveSplit.UI.Components
 {
+
+  public enum Crash4LoadState
+  {
+    WAITING_FOR_LOAD1,
+    LOAD1,
+    WAITING_FOR_LOAD2, // This state is only there for a couple of tolerance frame to check if we can find the swirl in the bottom left
+    TRANSITION_TO_LOAD2,
+    LOAD2
+  }
+
   class Crash4LoadRemoverComponent : IComponent
   {
     public string ComponentName
@@ -49,7 +59,9 @@ namespace LiveSplit.UI.Components
       LOADING
     }
 
+
     private CrashNSTState NSTState = CrashNSTState.RUNNING;
+    private Crash4LoadState Crash4State = Crash4LoadState.WAITING_FOR_LOAD1;
     private int runningFrames = 0;
     private int pausedFrames = 0;
     private int pausedFramesSegment = 0;
@@ -68,6 +80,9 @@ namespace LiveSplit.UI.Components
     private int framesSumRounded = 0;
     private int framesSinceLastManualSplit = 0;
     private bool LastSplitSkip = false;
+    private const float LOAD_PHASE_TOLERANCE_TIME = 0.3f; // waits 0.3s for the next load phase, otherwise discards it and returns to base state.
+    private Time load1_phase_start;
+    private Time load1_phase_end; // This is used for the tolerance
 
     //private HighResolutionTimer.HighResolutionTimer highResTimer;
     private List<int> NumberOfLoadsPerSplit;
@@ -158,24 +173,107 @@ namespace LiveSplit.UI.Components
           lastTime = DateTime.Now;
 
           //Capture image using the settings defined for the component
-          Bitmap capture = settings.CaptureImage();
-          List<int> max_per_patch;
-          List<int> min_per_patch;
-          //Feed the image to the feature detection
-          int black_level = 0;
-          //
-          var features = FeatureDetector.featuresFromBitmap(capture, out max_per_patch, out black_level, out min_per_patch);
-          int tempMatchingBins = 0;
-          bool wasLoading = isLoading;
-          bool wasTransition = isTransition;
-
-          //TODO: should we "learn" the black level automatically? we could do this during the first few transitions, by keeping track of the minimum histogram values, and dynamically adjusting the number of black bins?
+          Bitmap capture = settings.CaptureImage(Crash4State);
 
           try
           {
             //DateTime current_time = DateTime.Now;
-            isLoading = FeatureDetector.compareFeatureVector(features.ToArray(), FeatureDetector.listOfFeatureVectorsEng, out tempMatchingBins, -1.0f, false);
+            //isLoading = FeatureDetector.compareFeatureVector(features.ToArray(), FeatureDetector.listOfFeatureVectorsEng, out tempMatchingBins, -1.0f, false);
             //Console.WriteLine("Timing for detection: {0}", (DateTime.Now - current_time).TotalSeconds);
+
+            if(Crash4State == Crash4LoadState.WAITING_FOR_LOAD1 || Crash4State == Crash4LoadState.LOAD1 || Crash4State == Crash4LoadState.WAITING_FOR_LOAD2)
+            {
+              // Do HSV comparison on the raw image, without any features
+              float achieved_threshold = 0.0f;
+
+              isLoading = FeatureDetector.compareImageCaptureHSVCrash4(capture, 0.3f, out achieved_threshold, 5, 55, 75, 101, 75, 101);
+              //Console.WriteLine("Loading 1: " + isLoading.ToString() + ", achieved Threshold: " + achieved_threshold.ToString());
+
+              if(isLoading && Crash4State == Crash4LoadState.WAITING_FOR_LOAD1)
+              {
+                // Store current time - this is the start of our load!
+                Crash4State = Crash4LoadState.LOAD1;
+                load1_phase_start = timer.CurrentState.CurrentTime;
+                Console.WriteLine("Transition to LOAD1: Loading 1: " + isLoading.ToString() + ", achieved Threshold: " + achieved_threshold.ToString());
+              }
+              else if(isLoading && Crash4State == Crash4LoadState.LOAD1)
+              {
+                // Everything fine - nothing to do here.
+              }
+              else if(!isLoading && Crash4State == Crash4LoadState.LOAD1)
+              {
+                // Transtiion from load phase 1 into load phase 2 - this checks the next couple of frames until it potentially finds the load screen phase 2.
+                Crash4State = Crash4LoadState.WAITING_FOR_LOAD2;
+                load1_phase_end = timer.CurrentState.CurrentTime;
+
+                Console.WriteLine("Transition to WAITING_FOR_LOAD2: Loading 1: " + isLoading.ToString() + ", achieved Threshold: " + achieved_threshold.ToString());
+              }
+              else if(Crash4State == Crash4LoadState.WAITING_FOR_LOAD2)
+              {
+                // We're waiting for LOAD2 until the tolerance. If LOAD1 detection happens in the mean time, we reset back to LOAD1.
+
+                // Check if the elapsed time is over our tolerance
+
+                if(isLoading)
+                {
+                  // Store current time - this is the start of our load - this might happen if orange letters are shortly before the real load screen.
+                  Crash4State = Crash4LoadState.LOAD1;
+                  load1_phase_start = timer.CurrentState.CurrentTime;
+                  Console.WriteLine("load screen detected while waiting for LOAD2: Transition to LOAD1: Loading 1: " + isLoading.ToString() + ", achieved Threshold: " + achieved_threshold.ToString());
+                }
+                else if ((timer.CurrentState.CurrentTime - load1_phase_end).RealTime.Value.TotalSeconds > LOAD_PHASE_TOLERANCE_TIME)
+                {
+                  // Transition to TRANSITION_TO_LOAD2 state.
+                  Console.WriteLine("TOLERANCE OVER: Transition to TRANSITION_TO_LOAD2");
+                  Crash4State = Crash4LoadState.TRANSITION_TO_LOAD2;
+                }
+              }
+            }
+            else
+            {
+              // Do HSV comparison on the raw image, without any features
+              float achieved_threshold_1 = 0.0f;
+              float achieved_threshold_2 = 0.0f;
+
+              FeatureDetector.compareImageCaptureHSVCrash4(capture, 0.3f, out achieved_threshold_1, 200, 230, 80, 101, 50, 101);
+
+              FeatureDetector.compareImageCaptureHSVCrash4(capture, 0.3f, out achieved_threshold_2, -1, 360, 95, 101, -1, 15);
+
+              if((achieved_threshold_1 > 0.35f && achieved_threshold_2 > 0.10f) || (achieved_threshold_1 > 0.20f && achieved_threshold_2 > 0.15f))
+              {
+                // Everything fine, nothing to do here, except for transitioning to LOAD2
+                // Transition to LOAD2 state.
+
+                if(Crash4State == Crash4LoadState.TRANSITION_TO_LOAD2)
+                {
+                  Console.WriteLine("TRANSITION TO LOAD2: Loading 2: " + isLoading.ToString() + ", achieved Threshold (blue): " + achieved_threshold_1.ToString() + ", achieved Threshold (black): " + achieved_threshold_2.ToString());
+
+                  Crash4State = Crash4LoadState.LOAD2;
+                }
+                
+              }
+              else if (Crash4State == Crash4LoadState.LOAD2)
+              {
+                // We're done and went through a whole load cycle.
+                // Compute the duration and update the timer. 
+                var load_time = (timer.CurrentState.CurrentTime - load1_phase_start).RealTime.Value;
+                timer.CurrentState.LoadingTimes += load_time;
+                Crash4State = Crash4LoadState.WAITING_FOR_LOAD1;
+                Console.WriteLine("<<<<<<<<<<<<< LOAD DONE! back to to WAITING_FOR_LOAD1: elapsed time: " + load_time.TotalSeconds);
+                Console.WriteLine("LOAD DONE (pt2): Loading 2: " + isLoading.ToString() + ", achieved Threshold (blue): " + achieved_threshold_1.ToString() + ", achieved Threshold (black): " + achieved_threshold_2.ToString());
+              }
+              else
+              {
+                // This was a screen that detected the yellow/orange letters, didn't detect them again for the tolerance frame and then *didn't* detect LOAD2.
+                // Back to WAITING_FOR_LOAD1.
+                Console.WriteLine("TRANSITION TO WAITING_FOR_LOAD1 (didn't see swirl): Loading 2: " + isLoading.ToString() + ", achieved Threshold (blue): " + achieved_threshold_1.ToString() + ", achieved Threshold (black): " + achieved_threshold_2.ToString());
+
+                Crash4State = Crash4LoadState.WAITING_FOR_LOAD1;
+              }
+
+              //Console.WriteLine("Loading 2: " + isLoading.ToString() + ", achieved Threshold (blue): " + achieved_threshold_1.ToString() + ", achieved Threshold (black): " + achieved_threshold_2.ToString());
+            }
+
           }
           catch (Exception ex)
           {
@@ -184,18 +282,7 @@ namespace LiveSplit.UI.Components
             throw ex;
           }
 
-
-         /* if (isLoading && num_transitions < num_transitions_for_calibration)
-          {
-            num_transitions++;
-            sum_transitions_max_level += black_level;
-            average_transition_max_level = sum_transitions_max_level / num_transitions;
-            max_transition_max_level = Math.Max(black_level, max_transition_max_level);
-            Console.WriteLine("pre-load black-level: Average transition {5}: num: {0}, sum: {1}, last: {2}, avg: {3}, max: {4}", num_transitions, sum_transitions_max_level, last_transition_max_level, average_transition_max_level, max_transition_max_level, SplitNames[Math.Max(Math.Min(liveSplitState.CurrentSplitIndex, SplitNames.Count - 1), 0)]);
-            last_transition_max_level = 0.0f;
-          }*/
-
-
+          /*
           matchingBins = tempMatchingBins;
 
           timer.CurrentState.IsGameTimePaused = isLoading;
@@ -205,7 +292,7 @@ namespace LiveSplit.UI.Components
             float new_avg_transition_max = 0.0f;
             try
             {
-                isTransition = FeatureDetector.compareFeatureVectorTransition(features.ToArray(), FeatureDetector.listOfFeatureVectorsEng, max_per_patch, min_per_patch, - 1.0f, out new_avg_transition_max, out tempMatchingBins, 0.8f, false);//FeatureDetector.isGameTransition(capture, 30);
+                //isTransition = FeatureDetector.compareFeatureVectorTransition(features.ToArray(), FeatureDetector.listOfFeatureVectorsEng, max_per_patch, min_per_patch, - 1.0f, out new_avg_transition_max, out tempMatchingBins, 0.8f, false);//FeatureDetector.isGameTransition(capture, 30);
             }
             catch (Exception ex)
             {
@@ -351,7 +438,7 @@ namespace LiveSplit.UI.Components
           }
 
 
-          //Console.WriteLine("TIME TAKEN FOR DETECTION: {0}", DateTime.Now - lastTime);
+          //Console.WriteLine("TIME TAKEN FOR DETECTION: {0}", DateTime.Now - lastTime);*/
         }
       }
       catch (Exception ex)

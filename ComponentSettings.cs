@@ -123,13 +123,13 @@ namespace LiveSplit.UI.Components
 
 		private void cmbDatabase_SelectedIndexChanged(object sender, EventArgs e)
 		{
-			LoadRemoverDataName = cmbDatabase.SelectedItem.ToString();
+			//LoadRemoverDataName = cmbDatabase.SelectedItem.ToString();
 			DeserializeAndUpdateDetectorData();
 		}
 
 		private void SetComboBoxToStoredDatabase(string database)
 		{
-			for (int item_index = 0; item_index < cmbDatabase.Items.Count; item_index++)
+			/*for (int item_index = 0; item_index < cmbDatabase.Items.Count; item_index++)
 			{
 				var item = cmbDatabase.Items[item_index];
 				if (item.ToString() == database)
@@ -137,7 +137,7 @@ namespace LiveSplit.UI.Components
 					cmbDatabase.SelectedIndex = item_index;
 					return;
 				}
-			}
+			}*/
 		}
 
 		private string[] getDatabaseFiles()
@@ -149,6 +149,7 @@ namespace LiveSplit.UI.Components
 		{
 			DetectorData data = DeserializeDetectorData(LoadRemoverDataName);
 			captureSize = new Size(data.sizeX, data.sizeY);
+      return;
 			FeatureDetector.numberOfBins = data.numberOfHistogramBins;
 			FeatureDetector.patchSizeX = captureSize.Width / data.numPatchesX;
 			FeatureDetector.patchSizeY = captureSize.Height / data.numPatchesY;
@@ -173,20 +174,23 @@ namespace LiveSplit.UI.Components
 		{
 			InitializeComponent();
 
+      // TODO/NOTE: Removed AutoSplitter control. Might come back, might not.
+      tabControl1.TabPages.Remove(tabPage2);
+      /*
 			string[] database_files = getDatabaseFiles();
 
 			if (database_files.Length == 0)
 			{
 				MessageBox.Show("Error: Please make sure that at least one .crash4 file exists in the Components directory!", "Crash 4 Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
 				Application.Exit();
-			}
+			}*/
 
-			cmbDatabase.Items.Clear();
+			/*cmbDatabase.Items.Clear();
 			foreach (string database_file in database_files)
 			{
 				cmbDatabase.Items.Add(database_file);
 			}
-			cmbDatabase.SelectedIndex = 0;
+			cmbDatabase.SelectedIndex = 0;*/
 			//RemoveFadeins = chkRemoveFadeIns.Checked;
 			DeserializeAndUpdateDetectorData();
 
@@ -235,7 +239,7 @@ namespace LiveSplit.UI.Components
 					{
 						using (FileStream fs = new FileStream(fileName, FileMode.Create, FileAccess.ReadWrite))
 						{
-							Bitmap capture = CaptureImage();
+							Bitmap capture = CaptureImage(Crash4LoadState.WAITING_FOR_LOAD2);
 							capture.Save(memory, ImageFormat.Png);
 							byte[] bytes = memory.ToArray();
 							fs.Write(bytes, 0, bytes.Length);
@@ -249,7 +253,7 @@ namespace LiveSplit.UI.Components
 			imageCaptureInfo.cropOffsetY = cropOffsetY;
 			imageCaptureInfo.cropOffsetX = cropOffsetX;
 			CaptureImageFullPreview(ref imageCaptureInfo, true);
-			devToolsCroppedPictureBox.Image = CaptureImage();
+			devToolsCroppedPictureBox.Image = CaptureImage(Crash4LoadState.WAITING_FOR_LOAD2);
 
 
 		}
@@ -260,9 +264,32 @@ namespace LiveSplit.UI.Components
 			lblBlackLevel.Text = "Black-Level: " + AverageBlackLevel;
 		}
 
-		public Bitmap CaptureImage()
+		public Bitmap CaptureImage(Crash4LoadState state)
 		{
 			Bitmap b = new Bitmap(1, 1);
+
+      var copy_info = imageCaptureInfo;
+
+      if (state == Crash4LoadState.WAITING_FOR_LOAD1 || state == Crash4LoadState.LOAD1 || state == Crash4LoadState.WAITING_FOR_LOAD2)
+      {
+        // Switch imageCaptureInfo and use a different one. This is all very hacky and bad, but whatever
+        imageCaptureInfo.cropOffsetX = -38;
+        imageCaptureInfo.cropOffsetY = -455;
+        imageCaptureInfo.captureSizeX = 250;
+        imageCaptureInfo.captureSizeY = 50;
+        captureSize.Width = imageCaptureInfo.captureSizeX;
+        captureSize.Height = imageCaptureInfo.captureSizeY;
+      }
+      else
+      {
+        // Switch imageCaptureInfo and use a different one. This is all very hacky and bad, but whatever
+        imageCaptureInfo.cropOffsetX = -783;
+        imageCaptureInfo.cropOffsetY = 363;
+        imageCaptureInfo.captureSizeX = 50;
+        imageCaptureInfo.captureSizeY = 50;
+        captureSize.Width = imageCaptureInfo.captureSizeX;
+        captureSize.Height = imageCaptureInfo.captureSizeY;
+      }
 
 			//Full screen capture
 			if (processCaptureIndex < 0)
@@ -311,7 +338,15 @@ namespace LiveSplit.UI.Components
 				b = ImageCapture.PrintWindow(handle, ref imageCaptureInfo, useCrop: true);
 			}
 
-			return b;
+      // Restore from copy. This is all very hacky and bad, but whatever
+      imageCaptureInfo.cropOffsetX = copy_info.cropOffsetX;
+      imageCaptureInfo.cropOffsetY = copy_info.cropOffsetY;
+      imageCaptureInfo.captureSizeX = copy_info.captureSizeX;
+      imageCaptureInfo.captureSizeY = copy_info.captureSizeY;
+      captureSize.Width = imageCaptureInfo.captureSizeX;
+      captureSize.Height = imageCaptureInfo.captureSizeY;
+
+      return b;
 		}
 
 		public Bitmap CaptureImageFullPreview(ref ImageCaptureInfo imageCaptureInfo, bool useCrop = false)
@@ -515,7 +550,7 @@ namespace LiveSplit.UI.Components
 			settingsNode.AppendChild(ToElement(document, "RemoveFadeouts", chkRemoveTransitions.Checked));
 			//settingsNode.AppendChild(ToElement(document, "RemoveFadeins", chkRemoveFadeIns.Checked));
 			settingsNode.AppendChild(ToElement(document, "SaveDetectionLog", chkSaveDetectionLog.Checked));
-			settingsNode.AppendChild(ToElement(document, "DatabaseFile", cmbDatabase.SelectedItem.ToString()));
+			//settingsNode.AppendChild(ToElement(document, "DatabaseFile", cmbDatabase.SelectedItem.ToString()));
 
 			var splitsNode = document.CreateElement("AutoSplitGames");
 
@@ -706,7 +741,7 @@ namespace LiveSplit.UI.Components
 				DrawPreview();
 
 				CaptureImageFullPreview(ref imageCaptureInfo, true);
-				devToolsCroppedPictureBox.Image = CaptureImage();
+				devToolsCroppedPictureBox.Image = CaptureImage(Crash4LoadState.WAITING_FOR_LOAD2);
 			}
 		}
 
@@ -861,7 +896,7 @@ namespace LiveSplit.UI.Components
 				copy.captureSizeY = captureSize.Height;
 
 				//Show matching bins for preview
-				var capture = CaptureImage();
+				var capture = CaptureImage(Crash4LoadState.WAITING_FOR_LOAD2);
 				List<int> dummy;
 				List<int> dummy2;
 				int black_level = 0;
@@ -1194,7 +1229,7 @@ namespace LiveSplit.UI.Components
 			cropOffsetX = Convert.ToSingle(devToolsCropX.Value);
 			imageCaptureInfo.cropOffsetX = cropOffsetX;
 			CaptureImageFullPreview(ref imageCaptureInfo, true);
-			devToolsCroppedPictureBox.Image = CaptureImage();
+			devToolsCroppedPictureBox.Image = CaptureImage(Crash4LoadState.WAITING_FOR_LOAD2);
 		}
 
 		private void devToolsCropY_ValueChanged(object sender, EventArgs e)
@@ -1202,7 +1237,7 @@ namespace LiveSplit.UI.Components
 			cropOffsetY = Convert.ToSingle(devToolsCropY.Value);
 			imageCaptureInfo.cropOffsetY = cropOffsetY;
 			CaptureImageFullPreview(ref imageCaptureInfo, true);
-			devToolsCroppedPictureBox.Image = CaptureImage();
+			devToolsCroppedPictureBox.Image = CaptureImage(Crash4LoadState.WAITING_FOR_LOAD2);
 		}
 
 		private void devToolsRecord_CheckedChanged(object sender, EventArgs e)
@@ -1377,10 +1412,18 @@ namespace LiveSplit.UI.Components
 		DetectorData DeserializeDetectorData(string path)
 		{
 			//IFormatter formatter = new BinaryFormatter();
-			Stream stream = new FileStream(path, FileMode.Open, FileAccess.Read);
+			//Stream stream = new FileStream(path, FileMode.Open, FileAccess.Read);
 			//formatter.Binder = new Binder();
 			DetectorData data = new DetectorData();
+      data.numPatchesX = 1;
+      data.numPatchesY = 1;
+      data.sizeX = 250;
+      data.sizeY = 50;
+      
 
+      // NOTE: this is hacked in because we don't need databases here.
+      return data;
+      /*
 			using (BinaryReader binaryReader = new BinaryReader(stream))
 			{
 				// Read version number
@@ -1425,7 +1468,7 @@ namespace LiveSplit.UI.Components
 			imageCaptureInfo.cropOffsetX = cropOffsetX;
 			imageCaptureInfo.cropOffsetY = cropOffsetY;
 
-			return data;
+			return data;*/
 		}
 
 		private void devToolsDataBaseFromCaptureImages_Click(object sender, EventArgs e)

@@ -43,6 +43,115 @@ namespace CrashNSaneLoadDetector
 
 		#region Public Methods
 
+    public static void rgb2hsv(int r, int g, int b, out int h, out int s, out int v)
+    {
+      double r_normalized = r / 255.0f;
+      double g_normalized = g / 255.0f;
+      double b_normalized = b / 255.0f;
+
+      // h, s, v = hue, saturation, value 
+      double cmax = Math.Max(r_normalized, Math.Max(g_normalized, b_normalized)); // maximum of r, g, b 
+      double cmin = Math.Min(r_normalized, Math.Min(g_normalized, b_normalized)); // minimum of r, g, b 
+      double diff = cmax - cmin; // diff of cmax and cmin. 
+      double h_d = -1;
+      double s_d = -1;
+
+      // if cmax and cmax are equal then h = 0 
+      if (cmax == cmin)
+        h_d = 0;
+
+      // if cmax equal r then compute h 
+      else if (cmax == r_normalized)
+        h_d = (60 * ((g_normalized - b_normalized) / diff) + 360) % 360;
+
+      // if cmax equal g then compute h 
+      else if (cmax == g_normalized)
+        h_d = (60 * ((b_normalized - r_normalized) / diff) + 120) % 360;
+
+      // if cmax equal b then compute h 
+      else if (cmax == b_normalized)
+        h_d = (60 * ((r_normalized - g_normalized) / diff) + 240) % 360;
+
+      // if cmax equal zero 
+      if (cmax == 0)
+        s_d = 0;
+      else
+        s_d = (diff / cmax) * 100;
+
+      // compute v 
+      double v_d = cmax * 100;
+
+      h = Convert.ToInt32(h_d);
+      s = Convert.ToInt32(s_d);
+      v = Convert.ToInt32(v_d);
+    }
+
+    public static bool compareImageCaptureHSVCrash4(Bitmap capture, float detection_threshold, out float achieved_threshold, int h_min, int h_max, int s_min, int s_max, int v_min, int v_max)
+    {
+      int number_of_pixels = 0;
+
+
+
+      BitmapData bData = capture.LockBits(new Rectangle(0, 0, capture.Width, capture.Height), ImageLockMode.ReadWrite, capture.PixelFormat);
+      int bmpStride = bData.Stride;
+      int size = bData.Stride * bData.Height;
+
+      byte[] data = new byte[size];
+
+      /*This overload copies data of /size/ into /data/ from location specified (/Scan0/)*/
+      System.Runtime.InteropServices.Marshal.Copy(bData.Scan0, data, 0, size);
+      int yAdd = 0;
+      int r = 0;
+      int g = 0;
+      int b = 0;
+      int h = 0;
+      int s = 0;
+      int v = 0;
+      //we look at 50x50 patches and compute histogram bins for the a/r/g/b values.
+
+      int stride = 1; //spacing between feature pixels
+
+      for (int patchX = 0; patchX < (capture.Width / patchSizeX); patchX++)
+      {
+        for (int patchY = 0; patchY < (capture.Height / patchSizeY); patchY++)
+        {
+          int xStart = patchX * (patchSizeX * stride);
+          int yStart = patchY * (patchSizeX * stride);
+          int xEnd = (patchX + 1) * (patchSizeX * stride);
+          int yEnd = (patchY + 1) * (patchSizeY * stride);
+
+          for (int x_index = xStart; x_index < xEnd; x_index += stride)
+          {
+            for (int y_index = yStart; y_index < yEnd; y_index += stride)
+            {
+              yAdd = y_index * bmpStride;
+
+              //NOTE: while the pixel format is 32ARGB, reading byte-wise results in BGRA.
+              b = (int)(data[(x_index * 4) + (yAdd) + 0]);
+              g = (int)(data[(x_index * 4) + (yAdd) + 1]);
+              r = (int)(data[(x_index * 4) + (yAdd) + 2]);
+
+              rgb2hsv(r, g, b, out h, out s, out v);
+
+              if(h >= h_min && h <= h_max && s >= s_min && s <= s_max && v >= v_min && v <= v_max)
+              {
+                number_of_pixels++;
+              }
+
+
+            }
+          }
+
+        }
+      }
+
+      capture.UnlockBits(bData);
+
+      achieved_threshold = number_of_pixels / Convert.ToSingle(capture.Width * capture.Height);
+
+      return achieved_threshold >= detection_threshold;
+    }
+
 		public static bool compareFeatureVector(int[] newVector, int[,] comparison_vectors, out int matchingBins, float percentageOfBinsCorrectOverride = -1.0f, bool debugOutput = true)
 		{
 			//int[,] comparison_vectors = listOfFeatureVectorsEng;

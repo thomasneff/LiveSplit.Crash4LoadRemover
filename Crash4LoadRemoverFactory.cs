@@ -41,7 +41,7 @@ namespace LiveSplit.Crash4LoadRemover
 
         public Version Version
         {
-            get { return Version.Parse("1.0"); }
+            get { return Version.Parse("1.1"); }
         }
     }
 }
