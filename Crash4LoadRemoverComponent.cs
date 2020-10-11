@@ -239,7 +239,8 @@ namespace LiveSplit.UI.Components
 
               FeatureDetector.compareImageCaptureHSVCrash4(capture, 0.3f, out achieved_threshold_2, -1, 360, 95, 101, -1, 15);
 
-              if((achieved_threshold_1 > 0.35f && achieved_threshold_2 > 0.10f) || (achieved_threshold_1 > 0.20f && achieved_threshold_2 > 0.15f))
+              //if((achieved_threshold_1 > 0.35f && achieved_threshold_2 > 0.10f) || (achieved_threshold_1 > 0.20f && achieved_threshold_2 > 0.15f))
+              if(achieved_threshold_1 > 0.15f && achieved_threshold_2 > 0.08f)
               {
                 // Everything fine, nothing to do here, except for transitioning to LOAD2
                 // Transition to LOAD2 state.
