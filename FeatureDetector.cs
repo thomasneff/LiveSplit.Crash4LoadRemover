@@ -86,12 +86,153 @@ namespace CrashNSaneLoadDetector
       v = Convert.ToInt32(v_d);
     }
 
+    public class HSVRange
+    {
+      public int h_min;
+      public int h_max;
+      public int s_min;
+      public int s_max;
+      public int v_min;
+      public int v_max;
+
+      public HSVRange(int hmin, int hmax, int smin, int smax, int vmin, int vmax)
+      {
+        h_min = hmin;
+        h_max = hmax;
+        s_min = smin;
+        s_max = smax;
+        v_min = vmin;
+        v_max = vmax;
+      }
+    }
+
+
+
+    public static void compareImageCaptureCrash4(Bitmap capture, List<HSVRange> hsv_ranges, List<int> gradient_thresholds, List<float> achieved_hsv_ranges, List<float> achieved_gradient_thresholds, List<float> average_thresholded_gradients, int gradient_color_channel_offset)
+    {
+      List<int> number_of_pixels_in_range = new List<int>(hsv_ranges.Count);
+      List<int> number_of_gradient_pixels_in_threshold = new List<int>(gradient_thresholds.Count);
+
+      for (int i = 0; i < hsv_ranges.Count; i++)
+      {
+        achieved_hsv_ranges[i] = 0;
+        number_of_pixels_in_range.Add(0);
+      }
+
+      for (int i = 0; i < gradient_thresholds.Count; i++)
+      {
+        achieved_gradient_thresholds[i] = 0;
+        average_thresholded_gradients[i] = 0;
+        number_of_gradient_pixels_in_threshold.Add(0);
+      }
+
+      BitmapData bData = capture.LockBits(new Rectangle(0, 0, capture.Width, capture.Height), ImageLockMode.ReadWrite, capture.PixelFormat);
+      int bmpStride = bData.Stride;
+      int size = bData.Stride * bData.Height;
+
+      byte[] data = new byte[size];
+
+      /*This overload copies data of /size/ into /data/ from location specified (/Scan0/)*/
+      System.Runtime.InteropServices.Marshal.Copy(bData.Scan0, data, 0, size);
+      int yAdd = 0;
+      int r = 0;
+      int g = 0;
+      int b = 0;
+      int h = 0;
+      int s = 0;
+      int v = 0;
+      //we look at 50x50 patches and compute histogram bins for the a/r/g/b values.
+
+      int stride = 1; //spacing between feature pixels
+
+      for (int patchX = 0; patchX < (capture.Width / patchSizeX); patchX++)
+      {
+        for (int patchY = 0; patchY < (capture.Height / patchSizeY); patchY++)
+        {
+          int xStart = patchX * (patchSizeX * stride);
+          int yStart = patchY * (patchSizeX * stride);
+          int xEnd = (patchX + 1) * (patchSizeX * stride);
+          int yEnd = (patchY + 1) * (patchSizeY * stride);
+
+          for (int x_index = xStart; x_index < xEnd; x_index += stride)
+          {
+            for (int y_index = yStart; y_index < yEnd; y_index += stride)
+            {
+              yAdd = y_index * bmpStride;
+
+              //NOTE: while the pixel format is 32ARGB, reading byte-wise results in BGRA.
+              b = (int)(data[(x_index * 4) + (yAdd) + 0]);
+              g = (int)(data[(x_index * 4) + (yAdd) + 1]);
+              r = (int)(data[(x_index * 4) + (yAdd) + 2]);
+
+              rgb2hsv(r, g, b, out h, out s, out v);
+
+              // sobel filter on blue color channel
+              if(gradient_thresholds.Count != 0)
+              {
+                if (x_index < (bData.Width - 1) && x_index > 0 && y_index < (bData.Height - 1) && y_index > 0)
+                {
+                  int sobel_grad = -(int)(data[((x_index - 1) * 4) + (y_index - 1) * bmpStride + gradient_color_channel_offset])
+                    - 2 * (int)(data[((x_index - 1) * 4) + (y_index) * bmpStride + gradient_color_channel_offset])
+                    - (int)(data[((x_index - 1) * 4) + (y_index + 1) * bmpStride + gradient_color_channel_offset])
+                    + (int)(data[((x_index + 1) * 4) + (y_index - 1) * bmpStride + gradient_color_channel_offset])
+                    + 2 * (int)(data[((x_index + 1) * 4) + (y_index) * bmpStride + gradient_color_channel_offset])
+                    + (int)(data[((x_index + 1) * 4) + (y_index + 1) * bmpStride + gradient_color_channel_offset]);
+
+                  sobel_grad = Math.Abs(sobel_grad);
+
+                  // We do the following with sobel:
+                  // 1.) Compute the number of pixels (relative to img size) above threshold
+                  // 2.) Compute the average gradient above threshold
+
+                  for(int i = 0; i < gradient_thresholds.Count; i++)
+                  {
+                    if(sobel_grad > gradient_thresholds[i])
+                    {
+                      number_of_gradient_pixels_in_threshold[i]++;
+                      average_thresholded_gradients[i] += sobel_grad;
+                    }
+                  }
+
+                }
+              }
+              
+
+
+              for (int i = 0; i < hsv_ranges.Count; i++)
+              {               
+                if (h >= hsv_ranges[i].h_min && h <= hsv_ranges[i].h_max && s >= hsv_ranges[i].s_min && s <= hsv_ranges[i].s_max && v >= hsv_ranges[i].v_min && v <= hsv_ranges[i].v_max)
+                {
+                  number_of_pixels_in_range[i]++;
+                }
+              }
+              
+
+            }
+          }
+
+        }
+      }
+
+      capture.UnlockBits(bData);
+
+      for (int i = 0; i < hsv_ranges.Count; i++)
+      {
+        achieved_hsv_ranges[i] = number_of_pixels_in_range[i] / Convert.ToSingle(capture.Width * capture.Height);
+      }
+
+      for (int i = 0; i < gradient_thresholds.Count; i++)
+      {
+        achieved_gradient_thresholds[i] = number_of_gradient_pixels_in_threshold[i] / Convert.ToSingle(capture.Width * capture.Height);
+        average_thresholded_gradients[i] /= number_of_gradient_pixels_in_threshold[i];
+      }
+
+    }
+
     public static bool compareImageCaptureHSVCrash4(Bitmap capture, float detection_threshold, out float achieved_threshold, int h_min, int h_max, int s_min, int s_max, int v_min, int v_max)
     {
       int number_of_pixels = 0;
-
-
-
+      
       BitmapData bData = capture.LockBits(new Rectangle(0, 0, capture.Width, capture.Height), ImageLockMode.ReadWrite, capture.PixelFormat);
       int bmpStride = bData.Stride;
       int size = bData.Stride * bData.Height;

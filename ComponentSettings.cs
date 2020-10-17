@@ -239,7 +239,7 @@ namespace LiveSplit.UI.Components
 					{
 						using (FileStream fs = new FileStream(fileName, FileMode.Create, FileAccess.ReadWrite))
 						{
-							Bitmap capture = CaptureImage(Crash4LoadState.WAITING_FOR_LOAD2);
+							Bitmap capture = CaptureImage(Crash4LoadState.LOAD1);
 							capture.Save(memory, ImageFormat.Png);
 							byte[] bytes = memory.ToArray();
 							fs.Write(bytes, 0, bytes.Length);
@@ -253,7 +253,7 @@ namespace LiveSplit.UI.Components
 			imageCaptureInfo.cropOffsetY = cropOffsetY;
 			imageCaptureInfo.cropOffsetX = cropOffsetX;
 			CaptureImageFullPreview(ref imageCaptureInfo, true);
-			devToolsCroppedPictureBox.Image = CaptureImage(Crash4LoadState.WAITING_FOR_LOAD2);
+			devToolsCroppedPictureBox.Image = CaptureImage(Crash4LoadState.LOAD1);
 
 
 		}

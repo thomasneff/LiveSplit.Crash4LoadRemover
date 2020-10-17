@@ -5,6 +5,7 @@ using System.Drawing;
 using CrashNSaneLoadDetector;
 using System.IO;
 using System.Drawing.Imaging;
+using System.Diagnostics;
 //using System.Threading;
 
 namespace LiveSplit.UI.Components
@@ -86,6 +87,23 @@ namespace LiveSplit.UI.Components
 
     //private HighResolutionTimer.HighResolutionTimer highResTimer;
     private List<int> NumberOfLoadsPerSplit;
+    private List<FeatureDetector.HSVRange> hsv_ranges_load_1;
+    private List<int> gradient_thresholds_load_1;
+    private List<FeatureDetector.HSVRange> hsv_ranges_load_2;
+    private List<int> gradient_thresholds_load_2;
+
+    private List<FeatureDetector.HSVRange> test_hsv_ranges;
+    private List<int> test_gradient_ranges;
+
+
+    private List<float> achieved_hsv_ranges;
+    private List<float> achieved_gradient_thresholds;
+    private List<float> average_thresholded_gradients;
+
+    private bool output_state_info = false;
+    private bool output_first_load_debug = false;
+    private bool output_second_load_debug = false;
+    private bool output_to_file = true;
 
     public Crash4LoadRemoverComponent(LiveSplitState state)
     {
@@ -117,6 +135,56 @@ namespace LiveSplit.UI.Components
       timer.CurrentState.OnResume += timer_OnResume;
       //highResTimer = new HighResolutionTimer.HighResolutionTimer(16.0f);
       //highResTimer.Elapsed += (s, e) => { CaptureLoads(); };
+
+      hsv_ranges_load_1 = new List<FeatureDetector.HSVRange>();
+      hsv_ranges_load_2 = new List<FeatureDetector.HSVRange>();
+      gradient_thresholds_load_1 = new List<int>();
+      gradient_thresholds_load_2 = new List<int>();
+
+      //isLoading = FeatureDetector.compareImageCaptureHSVCrash4(capture, 0.3f, out achieved_threshold, 5, 55, 50, 101, 75, 101);
+
+      //isLoading &= FeatureDetector.compareImageCaptureHSVCrash4(capture, 0.08f, out achieved_threshold_2, -1, 361, 30, 101, -1, 30);
+      //FeatureDetector.compareImageCaptureHSVCrash4(capture, 0.3f, out achieved_threshold_1, 200, 230, 80, 101, 50, 101);
+
+      //FeatureDetector.compareImageCaptureHSVCrash4(capture, 0.3f, out achieved_threshold_2, -1, 360, 95, 101, -1, 15);
+
+      hsv_ranges_load_1.Add(new FeatureDetector.HSVRange(5, 55, 50, 101, 75, 101));
+      hsv_ranges_load_1.Add(new FeatureDetector.HSVRange(-1, 361, 30, 101, -1, 30));
+      gradient_thresholds_load_1.Add(102);
+      gradient_thresholds_load_1.Add(10);
+
+      hsv_ranges_load_2.Add(new FeatureDetector.HSVRange(200, 230, 80, 101, 50, 101));
+      hsv_ranges_load_2.Add(new FeatureDetector.HSVRange(-1, 360, 60, 101, -1, 35));
+
+      // TODO: determine optimal gradient thresholds
+      gradient_thresholds_load_2.Add(102);
+      gradient_thresholds_load_2.Add(10);
+
+      test_hsv_ranges = new List<FeatureDetector.HSVRange>();
+      test_gradient_ranges = new List<int>();
+      test_hsv_ranges.Add(new FeatureDetector.HSVRange(5, 55, 50, 101, 75, 101));
+      test_hsv_ranges.Add(new FeatureDetector.HSVRange(-1, 361, 30, 101, -1, 30));
+      test_gradient_ranges.Add(102);
+      test_gradient_ranges.Add(10);
+
+      test_hsv_ranges.Add(new FeatureDetector.HSVRange(200, 230, 80, 101, 50, 101));
+      test_hsv_ranges.Add(new FeatureDetector.HSVRange(-1, 360, 60, 101, -1, 35));
+
+
+      achieved_hsv_ranges = new List<float>();
+      achieved_gradient_thresholds = new List<float>();
+      average_thresholded_gradients = new List<float>();
+
+      for(int i = 0; i < test_hsv_ranges.Count; i++)
+      {
+        achieved_hsv_ranges.Add(0);
+      }
+
+      for (int i = 0; i < test_gradient_ranges.Count; i++)
+      {
+        achieved_gradient_thresholds.Add(0);
+        average_thresholded_gradients.Add(0);
+      }
     }
 
     private void timer_OnResume(object sender, EventArgs e)
@@ -174,27 +242,71 @@ namespace LiveSplit.UI.Components
 
           //Capture image using the settings defined for the component
           Bitmap capture = settings.CaptureImage(Crash4State);
+          isLoading = false;
 
           try
           {
+            // CSV Test code.
+            /*
+            FeatureDetector.compareImageCaptureCrash4(capture, test_hsv_ranges, test_gradient_ranges, achieved_hsv_ranges, achieved_gradient_thresholds, average_thresholded_gradients);
+
+            string csv_out = timer.CurrentState.CurrentTime.RealTime.ToString();
+
+            for (int i = 0; i < achieved_hsv_ranges.Count; i++)
+            {
+              csv_out += ";" + achieved_hsv_ranges[i];
+            }
+
+            for (int i = 0; i < achieved_gradient_thresholds.Count; i++)
+            {
+              csv_out += ";" + achieved_gradient_thresholds[i];
+              csv_out += ";" + average_thresholded_gradients[i];
+            }
+
+            Console.WriteLine(csv_out);*/
+            // ...
+
+
             //DateTime current_time = DateTime.Now;
             //isLoading = FeatureDetector.compareFeatureVector(features.ToArray(), FeatureDetector.listOfFeatureVectorsEng, out tempMatchingBins, -1.0f, false);
             //Console.WriteLine("Timing for detection: {0}", (DateTime.Now - current_time).TotalSeconds);
-
+            
             if(Crash4State == Crash4LoadState.WAITING_FOR_LOAD1 || Crash4State == Crash4LoadState.LOAD1 || Crash4State == Crash4LoadState.WAITING_FOR_LOAD2)
             {
               // Do HSV comparison on the raw image, without any features
-              float achieved_threshold = 0.0f;
+              //float achieved_threshold = 0.0f;
+              //float achieved_threshold_2 = 0.0f;
 
-              isLoading = FeatureDetector.compareImageCaptureHSVCrash4(capture, 0.3f, out achieved_threshold, 5, 55, 75, 101, 75, 101);
-              //Console.WriteLine("Loading 1: " + isLoading.ToString() + ", achieved Threshold: " + achieved_threshold.ToString());
+              //isLoading = FeatureDetector.compareImageCaptureHSVCrash4(capture, 0.3f, out achieved_threshold, 5, 55, 50, 101, 75, 101);
 
-              if(isLoading && Crash4State == Crash4LoadState.WAITING_FOR_LOAD1)
+              //isLoading &= FeatureDetector.compareImageCaptureHSVCrash4(capture, 0.08f, out achieved_threshold_2, -1, 361, 30, 101, -1, 30);
+
+              FeatureDetector.compareImageCaptureCrash4(capture, hsv_ranges_load_1, gradient_thresholds_load_1, achieved_hsv_ranges, achieved_gradient_thresholds, average_thresholded_gradients, 2);
+
+              isLoading = (achieved_hsv_ranges[0] > 0.04) && (achieved_gradient_thresholds[0] > 0.09) && (average_thresholded_gradients[1] > 60);
+              
+              if(output_first_load_debug)
+              {
+                string csv_out = "first_load;";
+                csv_out += ";" + achieved_hsv_ranges[0];
+
+                csv_out += ";" + achieved_gradient_thresholds[0];
+                csv_out += ";" + average_thresholded_gradients[1];
+
+
+                Console.WriteLine(csv_out);
+              }
+
+              //Console.WriteLine("Loading 1: " + isLoading.ToString() + ", achieved Threshold 1: " + achieved_threshold.ToString() + ", achieved Threshold 2: " + achieved_threshold_2.ToString());
+
+              if (isLoading && Crash4State == Crash4LoadState.WAITING_FOR_LOAD1)
               {
                 // Store current time - this is the start of our load!
                 Crash4State = Crash4LoadState.LOAD1;
                 load1_phase_start = timer.CurrentState.CurrentTime;
-                Console.WriteLine("Transition to LOAD1: Loading 1: " + isLoading.ToString() + ", achieved Threshold: " + achieved_threshold.ToString());
+
+                if(output_state_info)
+                  Console.WriteLine("Transition to LOAD1:");
               }
               else if(isLoading && Crash4State == Crash4LoadState.LOAD1)
               {
@@ -206,7 +318,8 @@ namespace LiveSplit.UI.Components
                 Crash4State = Crash4LoadState.WAITING_FOR_LOAD2;
                 load1_phase_end = timer.CurrentState.CurrentTime;
 
-                Console.WriteLine("Transition to WAITING_FOR_LOAD2: Loading 1: " + isLoading.ToString() + ", achieved Threshold: " + achieved_threshold.ToString());
+                if (output_state_info)
+                  Console.WriteLine("Transition to WAITING_FOR_LOAD2");
               }
               else if(Crash4State == Crash4LoadState.WAITING_FOR_LOAD2)
               {
@@ -219,12 +332,16 @@ namespace LiveSplit.UI.Components
                   // Store current time - this is the start of our load - this might happen if orange letters are shortly before the real load screen.
                   Crash4State = Crash4LoadState.LOAD1;
                   load1_phase_start = timer.CurrentState.CurrentTime;
-                  Console.WriteLine("load screen detected while waiting for LOAD2: Transition to LOAD1: Loading 1: " + isLoading.ToString() + ", achieved Threshold: " + achieved_threshold.ToString());
+
+                  if (output_state_info)
+                    Console.WriteLine("load screen detected while waiting for LOAD2: Transition to LOAD1: Loading 1: ");
                 }
                 else if ((timer.CurrentState.CurrentTime - load1_phase_end).RealTime.Value.TotalSeconds > LOAD_PHASE_TOLERANCE_TIME)
                 {
                   // Transition to TRANSITION_TO_LOAD2 state.
-                  Console.WriteLine("TOLERANCE OVER: Transition to TRANSITION_TO_LOAD2");
+                  if (output_state_info)
+                    Console.WriteLine("TOLERANCE OVER: Transition to TRANSITION_TO_LOAD2");
+
                   Crash4State = Crash4LoadState.TRANSITION_TO_LOAD2;
                 }
               }
@@ -232,22 +349,41 @@ namespace LiveSplit.UI.Components
             else
             {
               // Do HSV comparison on the raw image, without any features
-              float achieved_threshold_1 = 0.0f;
+              /*float achieved_threshold_1 = 0.0f;
               float achieved_threshold_2 = 0.0f;
 
               FeatureDetector.compareImageCaptureHSVCrash4(capture, 0.3f, out achieved_threshold_1, 200, 230, 80, 101, 50, 101);
 
-              FeatureDetector.compareImageCaptureHSVCrash4(capture, 0.3f, out achieved_threshold_2, -1, 360, 95, 101, -1, 15);
+              FeatureDetector.compareImageCaptureHSVCrash4(capture, 0.3f, out achieved_threshold_2, -1, 360, 95, 101, -1, 15);*/
+
+              FeatureDetector.compareImageCaptureCrash4(capture, hsv_ranges_load_2, gradient_thresholds_load_2, achieved_hsv_ranges, achieved_gradient_thresholds, average_thresholded_gradients, 0);
+
+              isLoading = (achieved_gradient_thresholds[0] > 0.04) && (average_thresholded_gradients[1] > 40);
+
+
+              isLoading &= ((achieved_hsv_ranges[0] > 0.40) && (achieved_hsv_ranges[1] > 0.04)) || ((achieved_hsv_ranges[0] > 0.35) && (achieved_hsv_ranges[1] > 0.05)) || ((achieved_hsv_ranges[0] > 0.30) && (achieved_hsv_ranges[1] > 0.06)) || ((achieved_hsv_ranges[0] > 0.25) && (achieved_hsv_ranges[1] > 0.12)) || ((achieved_hsv_ranges[0] > 0.20) && (achieved_hsv_ranges[1] > 0.17));
+
+              if(output_second_load_debug)
+              {
+                string csv_out = "second_load;";
+                csv_out += ";" + achieved_hsv_ranges[0];
+                csv_out += ";" + achieved_hsv_ranges[1];
+                csv_out += ";" + achieved_gradient_thresholds[0];
+                csv_out += ";" + average_thresholded_gradients[1];
+                Console.WriteLine(csv_out);
+              }
+              
 
               //if((achieved_threshold_1 > 0.35f && achieved_threshold_2 > 0.10f) || (achieved_threshold_1 > 0.20f && achieved_threshold_2 > 0.15f))
-              if(achieved_threshold_1 > 0.15f && achieved_threshold_2 > 0.08f)
+              if (isLoading)
               {
                 // Everything fine, nothing to do here, except for transitioning to LOAD2
                 // Transition to LOAD2 state.
 
                 if(Crash4State == Crash4LoadState.TRANSITION_TO_LOAD2)
                 {
-                  Console.WriteLine("TRANSITION TO LOAD2: Loading 2: " + isLoading.ToString() + ", achieved Threshold (blue): " + achieved_threshold_1.ToString() + ", achieved Threshold (black): " + achieved_threshold_2.ToString());
+                  if (output_state_info)
+                    Console.WriteLine("TRANSITION TO LOAD2: Loading 2: ");
 
                   Crash4State = Crash4LoadState.LOAD2;
                 }
@@ -260,21 +396,24 @@ namespace LiveSplit.UI.Components
                 var load_time = (timer.CurrentState.CurrentTime - load1_phase_start).RealTime.Value;
                 timer.CurrentState.LoadingTimes += load_time;
                 Crash4State = Crash4LoadState.WAITING_FOR_LOAD1;
-                Console.WriteLine("<<<<<<<<<<<<< LOAD DONE! back to to WAITING_FOR_LOAD1: elapsed time: " + load_time.TotalSeconds);
-                Console.WriteLine("LOAD DONE (pt2): Loading 2: " + isLoading.ToString() + ", achieved Threshold (blue): " + achieved_threshold_1.ToString() + ", achieved Threshold (black): " + achieved_threshold_2.ToString());
+                Console.WriteLine(load_time.TotalSeconds + ";" + load1_phase_start.RealTime.ToString() + ";" + timer.CurrentState.CurrentTime.RealTime.ToString());
+
+                if (output_state_info)
+                  Console.WriteLine("<<<<<<<<<<<<< LOAD DONE! back to to WAITING_FOR_LOAD1: elapsed time: " + load_time.TotalSeconds);
+                //Console.WriteLine("LOAD DONE (pt2): Loading 2: " + isLoading.ToString() + ", achieved Threshold (blue): " + achieved_threshold_1.ToString() + ", achieved Threshold (black): " + achieved_threshold_2.ToString());
               }
               else
               {
                 // This was a screen that detected the yellow/orange letters, didn't detect them again for the tolerance frame and then *didn't* detect LOAD2.
                 // Back to WAITING_FOR_LOAD1.
-                Console.WriteLine("TRANSITION TO WAITING_FOR_LOAD1 (didn't see swirl): Loading 2: " + isLoading.ToString() + ", achieved Threshold (blue): " + achieved_threshold_1.ToString() + ", achieved Threshold (black): " + achieved_threshold_2.ToString());
+                if (output_state_info)
+                  Console.WriteLine("TRANSITION TO WAITING_FOR_LOAD1 (didn't see swirl): Loading 2: ");
 
                 Crash4State = Crash4LoadState.WAITING_FOR_LOAD1;
               }
 
               //Console.WriteLine("Loading 2: " + isLoading.ToString() + ", achieved Threshold (blue): " + achieved_threshold_1.ToString() + ", achieved Threshold (black): " + achieved_threshold_2.ToString());
             }
-
           }
           catch (Exception ex)
           {
@@ -591,9 +730,12 @@ namespace LiveSplit.UI.Components
       log_file_stream = new FileStream(fileName, FileMode.Create);
       log_file_writer = new StreamWriter(log_file_stream);
       log_file_writer.AutoFlush = true;
-      Console.SetOut(log_file_writer);
-      Console.SetError(log_file_writer);
 
+      if(output_to_file)
+      {
+        Console.SetOut(log_file_writer);
+        Console.SetError(log_file_writer);
+      }
     }
 
     private bool SplitsAreDifferent(LiveSplitState newState)
