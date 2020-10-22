@@ -33,6 +33,7 @@ namespace LiveSplit.UI.Components
 		public bool SaveDetectionLog = false;
 
 		public bool RecordImages = false;
+    public bool DetailedDetectionLog = false;
 
 		public int AverageBlackLevel = -1;
 
@@ -273,10 +274,10 @@ namespace LiveSplit.UI.Components
       if (state == Crash4LoadState.WAITING_FOR_LOAD1 || state == Crash4LoadState.LOAD1 || state == Crash4LoadState.WAITING_FOR_LOAD2)
       {
         // Switch imageCaptureInfo and use a different one. This is all very hacky and bad, but whatever
-        imageCaptureInfo.cropOffsetX = -38;
-        imageCaptureInfo.cropOffsetY = -455;
-        imageCaptureInfo.captureSizeX = 250;
-        imageCaptureInfo.captureSizeY = 50;
+        imageCaptureInfo.cropOffsetX = -13;
+        imageCaptureInfo.cropOffsetY = -460;
+        imageCaptureInfo.captureSizeX = 300;
+        imageCaptureInfo.captureSizeY = 40;
         captureSize.Width = imageCaptureInfo.captureSizeX;
         captureSize.Height = imageCaptureInfo.captureSizeY;
       }
@@ -522,7 +523,7 @@ namespace LiveSplit.UI.Components
 
 			settingsNode.AppendChild(ToElement(document, "Version", Assembly.GetExecutingAssembly().GetName().Version.ToString(3)));
 
-			settingsNode.AppendChild(ToElement(document, "RequiredMatches", FeatureDetector.numberOfBinsCorrect));
+			//settingsNode.AppendChild(ToElement(document, "RequiredMatches", FeatureDetector.numberOfBinsCorrect));
 
 			if (captureIDs != null)
 			{
@@ -550,9 +551,11 @@ namespace LiveSplit.UI.Components
 			settingsNode.AppendChild(ToElement(document, "RemoveFadeouts", chkRemoveTransitions.Checked));
 			//settingsNode.AppendChild(ToElement(document, "RemoveFadeins", chkRemoveFadeIns.Checked));
 			settingsNode.AppendChild(ToElement(document, "SaveDetectionLog", chkSaveDetectionLog.Checked));
-			//settingsNode.AppendChild(ToElement(document, "DatabaseFile", cmbDatabase.SelectedItem.ToString()));
+      settingsNode.AppendChild(ToElement(document, "DetailedDetectionLog", chkUseDetailedDetectionLog.Checked));
 
-			var splitsNode = document.CreateElement("AutoSplitGames");
+      //settingsNode.AppendChild(ToElement(document, "DatabaseFile", cmbDatabase.SelectedItem.ToString()));
+
+      var splitsNode = document.CreateElement("AutoSplitGames");
 
 			//Re-Add all other games/categories to the xml file
 			foreach (var gameSettings in AllGameAutoSplitSettings)
@@ -611,11 +614,11 @@ namespace LiveSplit.UI.Components
 					version = new Version(1, 0, 0);
 				}
 
-				if (element["RequiredMatches"] != null)
+				/*if (element["RequiredMatches"] != null)
 				{
 					FeatureDetector.numberOfBinsCorrect = Convert.ToInt32(element["RequiredMatches"].InnerText);
 					requiredMatchesUpDown.Value = Convert.ToDecimal(FeatureDetector.numberOfBinsCorrect / (float)FeatureDetector.listOfFeatureVectorsEng.GetLength(1));
-				}
+				}*/
 
 				if (element["SelectedCaptureTitle"] != null)
 				{
@@ -630,7 +633,8 @@ namespace LiveSplit.UI.Components
 					trackBar1.Value = Convert.ToInt32(element["ScalingPercent"].InnerText);
 				}
 
-				if (element["CaptureRegion"] != null)
+
+        if (element["CaptureRegion"] != null)
 				{
 					var element_region = element["CaptureRegion"];
 					if (element_region["X"] != null && element_region["Y"] != null && element_region["Width"] != null && element_region["Height"] != null)
@@ -640,7 +644,12 @@ namespace LiveSplit.UI.Components
 						int captureRegionWidth = Convert.ToInt32(element_region["Width"].InnerText);
 						int captureRegionHeight = Convert.ToInt32(element_region["Height"].InnerText);
 
-						selectionRectanglePreviewBox = new Rectangle(captureRegionX, captureRegionY, captureRegionWidth, captureRegionHeight);
+            captureRegionX = Math.Max(Math.Min(captureRegionX, Convert.ToInt32(numTopLeftRectX.Maximum)), 0);
+            captureRegionY = Math.Max(Math.Min(captureRegionY, Convert.ToInt32(numTopLeftRectY.Maximum)), 0);
+            captureRegionWidth = Math.Max(Math.Min(captureRegionWidth, Convert.ToInt32(numBottomRightRectX.Maximum) - captureRegionX), 0);
+            captureRegionHeight = Math.Max(Math.Min(captureRegionHeight, Convert.ToInt32(numBottomRightRectY.Maximum) - captureRegionY), 0);
+
+            selectionRectanglePreviewBox = new Rectangle(captureRegionX, captureRegionY, captureRegionWidth, captureRegionHeight);
 						selectionTopLeft = new Point(captureRegionX, captureRegionY);
 						selectionBottomRight = new Point(captureRegionX + captureRegionWidth, captureRegionY + captureRegionHeight);
 
@@ -684,7 +693,13 @@ namespace LiveSplit.UI.Components
 					chkSaveDetectionLog.Checked = Convert.ToBoolean(element["SaveDetectionLog"].InnerText);
 				}
 
-				if (element["DatabaseFile"] != null)
+
+        if (element["DetailedDetectionLog"] != null)
+        {
+          chkUseDetailedDetectionLog.Checked = Convert.ToBoolean(element["DetailedDetectionLog"].InnerText);
+        }
+
+        if (element["DatabaseFile"] != null)
 				{
 					SetComboBoxToStoredDatabase(element["DatabaseFile"].InnerText);
 				}
@@ -928,8 +943,8 @@ namespace LiveSplit.UI.Components
 			selectionBottomRight = new Point(previewPictureBox.Width, previewPictureBox.Height);
 			selectionRectanglePreviewBox = new Rectangle(selectionTopLeft.X, selectionTopLeft.Y, selectionBottomRight.X - selectionTopLeft.X, selectionBottomRight.Y - selectionTopLeft.Y);
 
-			float required_matches = Math.Min(Convert.ToSingle(FeatureDetector.numberOfBinsCorrect / (float)FeatureDetector.listOfFeatureVectorsEng.GetLength(1)), 1.0f);
-			requiredMatchesUpDown.Value = Convert.ToDecimal(required_matches);
+			//float required_matches = Math.Min(Convert.ToSingle(FeatureDetector.numberOfBinsCorrect / (float)FeatureDetector.listOfFeatureVectorsEng.GetLength(1)), 1.0f);
+			//requiredMatchesUpDown.Value = Convert.ToDecimal(required_matches);
 
 			imageCaptureInfo.featureVectorResolutionX = featureVectorResolutionX;
 			imageCaptureInfo.featureVectorResolutionY = featureVectorResolutionY;
@@ -1071,7 +1086,7 @@ namespace LiveSplit.UI.Components
 
 		private void requiredMatchesUpDown_ValueChanged(object sender, EventArgs e)
 		{
-			FeatureDetector.numberOfBinsCorrect = (int)(requiredMatchesUpDown.Value * FeatureDetector.listOfFeatureVectorsEng.GetLength(1));
+			//FeatureDetector.numberOfBinsCorrect = (int)(requiredMatchesUpDown.Value * FeatureDetector.listOfFeatureVectorsEng.GetLength(1));
 		}
 
 		private void saveDiagnosticsButton_Click(object sender, EventArgs e)
@@ -1136,20 +1151,20 @@ namespace LiveSplit.UI.Components
 			}
 
 			do_not_trigger_value_changed = true;
-			numTopLeftRectY.Value = selectionTopLeft.Y;
+      numTopLeftRectY.Value = Math.Max(Math.Min(selectionTopLeft.Y, numTopLeftRectY.Maximum), 0);
 
 			do_not_trigger_value_changed = true;
-			numTopLeftRectX.Value = selectionTopLeft.X;
+			numTopLeftRectX.Value = Math.Max(Math.Min(selectionTopLeft.X, numTopLeftRectX.Maximum), 0);
+
+      do_not_trigger_value_changed = true;
+			numBottomRightRectY.Value = Math.Max(Math.Min(selectionBottomRight.Y, numBottomRightRectY.Maximum), 0);
 
 			do_not_trigger_value_changed = true;
-			numBottomRightRectY.Value = selectionBottomRight.Y;
-
-			do_not_trigger_value_changed = true;
-			numBottomRightRectX.Value = selectionBottomRight.X;
+			numBottomRightRectX.Value = Math.Max(Math.Min(selectionBottomRight.X, numBottomRightRectX.Maximum), 0);
 
 
 
-			selectionRectanglePreviewBox = new Rectangle(selectionTopLeft.X, selectionTopLeft.Y, selectionBottomRight.X - selectionTopLeft.X, selectionBottomRight.Y - selectionTopLeft.Y);
+      selectionRectanglePreviewBox = new Rectangle(selectionTopLeft.X, selectionTopLeft.Y, selectionBottomRight.X - selectionTopLeft.X, selectionBottomRight.Y - selectionTopLeft.Y);
 		}
 
 		private XmlElement ToElement<T>(XmlDocument document, String name, T value)
@@ -1537,9 +1552,14 @@ namespace LiveSplit.UI.Components
 			imageCaptureInfo.captureSizeY = captureSize.Height;
 			//initImageCaptureInfo();
 		}
-	}
 
-	[Serializable]
+    private void chkUseDetailedDetectionLog_CheckedChanged(object sender, EventArgs e)
+    {
+      DetailedDetectionLog = chkUseDetailedDetectionLog.Checked;
+    }
+  }
+
+  [Serializable]
 	public class DetectorData
 	{
 		public int version = 1;

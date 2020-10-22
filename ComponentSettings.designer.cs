@@ -46,6 +46,7 @@
       this.updatePreviewButton = new System.Windows.Forms.Button();
       this.tabControl1 = new System.Windows.Forms.TabControl();
       this.tabPage1 = new System.Windows.Forms.TabPage();
+      this.chkUseDetailedDetectionLog = new System.Windows.Forms.CheckBox();
       this.label19 = new System.Windows.Forms.Label();
       this.panel3 = new System.Windows.Forms.Panel();
       this.label16 = new System.Windows.Forms.Label();
@@ -333,6 +334,7 @@
       // tabPage1
       // 
       this.tabPage1.BackColor = System.Drawing.SystemColors.Control;
+      this.tabPage1.Controls.Add(this.chkUseDetailedDetectionLog);
       this.tabPage1.Controls.Add(this.label19);
       this.tabPage1.Controls.Add(this.panel3);
       this.tabPage1.Controls.Add(this.panel2);
@@ -355,6 +357,17 @@
       this.tabPage1.Size = new System.Drawing.Size(468, 506);
       this.tabPage1.TabIndex = 0;
       this.tabPage1.Text = "Setup";
+      // 
+      // chkUseDetailedDetectionLog
+      // 
+      this.chkUseDetailedDetectionLog.AutoSize = true;
+      this.chkUseDetailedDetectionLog.Location = new System.Drawing.Point(247, 130);
+      this.chkUseDetailedDetectionLog.Name = "chkUseDetailedDetectionLog";
+      this.chkUseDetailedDetectionLog.Size = new System.Drawing.Size(135, 17);
+      this.chkUseDetailedDetectionLog.TabIndex = 48;
+      this.chkUseDetailedDetectionLog.Text = "Detailed Detection Log";
+      this.chkUseDetailedDetectionLog.UseVisualStyleBackColor = true;
+      this.chkUseDetailedDetectionLog.CheckedChanged += new System.EventHandler(this.chkUseDetailedDetectionLog_CheckedChanged);
       // 
       // label19
       // 
@@ -532,7 +545,7 @@
       // lblBlackLevel
       // 
       this.lblBlackLevel.AutoSize = true;
-      this.lblBlackLevel.Location = new System.Drawing.Point(376, 131);
+      this.lblBlackLevel.Location = new System.Drawing.Point(6, 39);
       this.lblBlackLevel.Name = "lblBlackLevel";
       this.lblBlackLevel.Size = new System.Drawing.Size(78, 13);
       this.lblBlackLevel.TabIndex = 41;
@@ -569,7 +582,7 @@
       // chkRemoveTransitions
       // 
       this.chkRemoveTransitions.AutoSize = true;
-      this.chkRemoveTransitions.Location = new System.Drawing.Point(250, 130);
+      this.chkRemoveTransitions.Location = new System.Drawing.Point(98, 39);
       this.chkRemoveTransitions.Name = "chkRemoveTransitions";
       this.chkRemoveTransitions.Size = new System.Drawing.Size(120, 17);
       this.chkRemoveTransitions.TabIndex = 38;
@@ -1089,5 +1102,6 @@
 		private System.Windows.Forms.NumericUpDown devToolsNumPatchY;
 		private System.Windows.Forms.Label label24;
 		private System.Windows.Forms.NumericUpDown devToolsNumPatchX;
-	}
+    private System.Windows.Forms.CheckBox chkUseDetailedDetectionLog;
+  }
 }

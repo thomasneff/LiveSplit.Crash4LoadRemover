@@ -30,9 +30,9 @@ namespace CrashNSaneLoadDetector
 
 		public static int numberOfBins = 16;
 
-		public static int patchSizeX = 50;
+		public static int patchSizeX = 10;
 
-		public static int patchSizeY = 50;
+		public static int patchSizeY = 10;
 
 		//used as a cutoff for when a match is detected correctly
 		private static float varianceOfBinsAllowed = 1.0f;

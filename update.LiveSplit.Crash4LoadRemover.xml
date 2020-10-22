@@ -1,5 +1,18 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <updates>
+  <update version="1.4">
+    <files>
+      <file path="Components/LiveSplit.Crash4LoadRemover.dll" status="changed" />
+    </files>
+    <changelog>
+      <change>
+        Tweaked the detection parameters a bit to hopefully prevent misdetections when entering levels from the level select menu.
+        Added some checks to prevent crashes when invalid values are set for the capture region. 
+        Added checkbox for detailed logs. These can be enabled to get more information about the load remover state at every frame in the log files.
+        (Only enable that setting if necessary for analysis/debugging, it's costly performance wise.)
+      </change>
+    </changelog>
+  </update>
   <update version="1.3">
     <files>
       <file path="Components/LiveSplit.Crash4LoadRemover.dll" status="changed" />
