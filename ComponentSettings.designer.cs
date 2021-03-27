@@ -46,6 +46,7 @@
       this.updatePreviewButton = new System.Windows.Forms.Button();
       this.tabControl1 = new System.Windows.Forms.TabControl();
       this.tabPage1 = new System.Windows.Forms.TabPage();
+      this.chkWGCEnabled = new System.Windows.Forms.CheckBox();
       this.chkUseDetailedDetectionLog = new System.Windows.Forms.CheckBox();
       this.label19 = new System.Windows.Forms.Label();
       this.panel3 = new System.Windows.Forms.Panel();
@@ -162,6 +163,7 @@
       this.previewPictureBox.Size = new System.Drawing.Size(400, 180);
       this.previewPictureBox.TabIndex = 24;
       this.previewPictureBox.TabStop = false;
+      this.previewPictureBox.Click += new System.EventHandler(this.previewPictureBox_Click);
       this.previewPictureBox.MouseClick += new System.Windows.Forms.MouseEventHandler(this.previewPictureBox_MouseClick);
       this.previewPictureBox.MouseDown += new System.Windows.Forms.MouseEventHandler(this.previewPictureBox_MouseDown);
       this.previewPictureBox.MouseMove += new System.Windows.Forms.MouseEventHandler(this.previewPictureBox_MouseMove);
@@ -334,6 +336,7 @@
       // tabPage1
       // 
       this.tabPage1.BackColor = System.Drawing.SystemColors.Control;
+      this.tabPage1.Controls.Add(this.chkWGCEnabled);
       this.tabPage1.Controls.Add(this.chkUseDetailedDetectionLog);
       this.tabPage1.Controls.Add(this.label19);
       this.tabPage1.Controls.Add(this.panel3);
@@ -357,6 +360,17 @@
       this.tabPage1.Size = new System.Drawing.Size(468, 506);
       this.tabPage1.TabIndex = 0;
       this.tabPage1.Text = "Setup";
+      // 
+      // chkWGCEnabled
+      // 
+      this.chkWGCEnabled.AutoSize = true;
+      this.chkWGCEnabled.Location = new System.Drawing.Point(29, 33);
+      this.chkWGCEnabled.Name = "chkWGCEnabled";
+      this.chkWGCEnabled.Size = new System.Drawing.Size(384, 17);
+      this.chkWGCEnabled.TabIndex = 49;
+      this.chkWGCEnabled.Text = "Windows Graphics Capture (Enable for hardware-accelerated windows only)";
+      this.chkWGCEnabled.UseVisualStyleBackColor = true;
+      this.chkWGCEnabled.CheckedChanged += new System.EventHandler(this.chkWGCEnabled_CheckedChanged);
       // 
       // chkUseDetailedDetectionLog
       // 
@@ -1103,5 +1117,6 @@
 		private System.Windows.Forms.Label label24;
 		private System.Windows.Forms.NumericUpDown devToolsNumPatchX;
     private System.Windows.Forms.CheckBox chkUseDetailedDetectionLog;
+    private System.Windows.Forms.CheckBox chkWGCEnabled;
   }
 }

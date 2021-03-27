@@ -1,4 +1,5 @@
-﻿using CrashNSaneLoadDetector;
+﻿using CaptureSampleCore;
+using CrashNSaneLoadDetector;
 using LiveSplit.Model;
 using System;
 using System.Collections.Generic;
@@ -105,12 +106,14 @@ namespace LiveSplit.UI.Components
 		private Point selectionBottomRight = new Point(0, 0);
 		private Rectangle selectionRectanglePreviewBox;
 		private Point selectionTopLeft = new Point(0, 0);
+    private BasicSampleApplication WGCCaptureSample;
+    private bool WGCEnabled = false;
 
-		#endregion Private Fields
+    #endregion Private Fields
 
-		#region Public Constructors
+    #region Public Constructors
 
-		private string LoadRemoverDataName = "";
+    private string LoadRemoverDataName = "";
 
 		public class Binder : System.Runtime.Serialization.SerializationBinder
 		{
@@ -177,6 +180,13 @@ namespace LiveSplit.UI.Components
 
       // TODO/NOTE: Removed AutoSplitter control. Might come back, might not.
       tabControl1.TabPages.Remove(tabPage2);
+
+
+      WGCCaptureSample = new BasicSampleApplication();
+      WGCCaptureSample.Init();
+
+      if (!WGCCaptureSample.CanUseWGCCapture)
+        chkWGCEnabled.Visible = false;
       /*
 			string[] database_files = getDatabaseFiles();
 
@@ -186,14 +196,14 @@ namespace LiveSplit.UI.Components
 				Application.Exit();
 			}*/
 
-			/*cmbDatabase.Items.Clear();
+      /*cmbDatabase.Items.Clear();
 			foreach (string database_file in database_files)
 			{
 				cmbDatabase.Items.Add(database_file);
 			}
 			cmbDatabase.SelectedIndex = 0;*/
-			//RemoveFadeins = chkRemoveFadeIns.Checked;
-			DeserializeAndUpdateDetectorData();
+      //RemoveFadeins = chkRemoveFadeIns.Checked;
+      DeserializeAndUpdateDetectorData();
 
 			RemoveFadeouts = chkRemoveTransitions.Checked;
 			RemoveFadeins = chkRemoveTransitions.Checked;
@@ -219,7 +229,7 @@ namespace LiveSplit.UI.Components
 
 		#region Public Methods
 
-		public void StoreCaptureImage(string gameName, string category)
+		public void StoreCaptureImage(string gameName, string category, Bitmap img = null)
 		{
 			System.IO.Directory.CreateDirectory(Path.Combine(DetectionLogFolderName, devToolsCaptureImageText.Text));
 
@@ -240,7 +250,17 @@ namespace LiveSplit.UI.Components
 					{
 						using (FileStream fs = new FileStream(fileName, FileMode.Create, FileAccess.ReadWrite))
 						{
-							Bitmap capture = CaptureImage(Crash4LoadState.LOAD1);
+              Bitmap capture = null;
+
+              if (img != null)
+              {
+                capture = img;
+              }
+              else
+              {
+                capture = CaptureImage(Crash4LoadState.LOAD1);
+              }
+							
 							capture.Save(memory, ImageFormat.Png);
 							byte[] bytes = memory.ToArray();
 							fs.Write(bytes, 0, bytes.Length);
@@ -264,12 +284,13 @@ namespace LiveSplit.UI.Components
 			AverageBlackLevel = black_level;
 			lblBlackLevel.Text = "Black-Level: " + AverageBlackLevel;
 		}
-
+    int frameNumber = 0;
 		public Bitmap CaptureImage(Crash4LoadState state)
 		{
 			Bitmap b = new Bitmap(1, 1);
 
       var copy_info = imageCaptureInfo;
+      int feature_offset = 0;
 
       if (state == Crash4LoadState.WAITING_FOR_LOAD1 || state == Crash4LoadState.LOAD1 || state == Crash4LoadState.WAITING_FOR_LOAD2)
       {
@@ -278,6 +299,14 @@ namespace LiveSplit.UI.Components
         imageCaptureInfo.cropOffsetY = -460;
         imageCaptureInfo.captureSizeX = 300;
         imageCaptureInfo.captureSizeY = 40;
+        imageCaptureInfo.feature_size_x = 300;
+        imageCaptureInfo.feature_size_y = 40;
+        imageCaptureInfo.feature_size_x2 = 50;
+        imageCaptureInfo.feature_size_y2 = 50;
+        imageCaptureInfo.cropOffsetX2 = -783;
+        imageCaptureInfo.cropOffsetY2 = 363;
+        imageCaptureInfo.cropOffsetX1 = -13;
+        imageCaptureInfo.cropOffsetY1 = -460;
         captureSize.Width = imageCaptureInfo.captureSizeX;
         captureSize.Height = imageCaptureInfo.captureSizeY;
       }
@@ -288,8 +317,17 @@ namespace LiveSplit.UI.Components
         imageCaptureInfo.cropOffsetY = 363;
         imageCaptureInfo.captureSizeX = 50;
         imageCaptureInfo.captureSizeY = 50;
+        imageCaptureInfo.feature_size_x = 300;
+        imageCaptureInfo.feature_size_y = 40;
+        imageCaptureInfo.feature_size_x2 = 50;
+        imageCaptureInfo.feature_size_y2 = 50;
+        imageCaptureInfo.cropOffsetX2 = -783;
+        imageCaptureInfo.cropOffsetY2 = 363;
+        imageCaptureInfo.cropOffsetX1 = -13;
+        imageCaptureInfo.cropOffsetY1 = -460;
         captureSize.Width = imageCaptureInfo.captureSizeX;
         captureSize.Height = imageCaptureInfo.captureSizeY;
+        feature_offset = 3;
       }
 
 			//Full screen capture
@@ -336,7 +374,19 @@ namespace LiveSplit.UI.Components
 				if ((int)handle == 0)
 					return b;
 
-				b = ImageCapture.PrintWindow(handle, ref imageCaptureInfo, useCrop: true);
+        if(!WGCEnabled)
+        {
+          b = ImageCapture.PrintWindow(handle, ref imageCaptureInfo, useCrop: true);
+        }
+				else
+        {
+          WGCCaptureSample.StartCaptureFromHwnd(handle);
+          //WGCCaptureSample.SetImageCaptureInfo(ref imageCaptureInfo);
+          b = WGCCaptureSample.getNewestBitmap(feature_offset);
+          //b.Save("outputs/test" + frameNumber++ + ".png");
+        }
+
+
 			}
 
       // Restore from copy. This is all very hacky and bad, but whatever
@@ -413,13 +463,47 @@ namespace LiveSplit.UI.Components
 				if ((int)handle == 0)
 					return b;
 
-				b = ImageCapture.PrintWindow(handle, ref imageCaptureInfo, full: true, useCrop: useCrop, scalingValueFloat: scalingValueFloat);
-			}
+        if (!WGCEnabled)
+        {
+          b = ImageCapture.PrintWindow(handle, ref imageCaptureInfo, full: true, useCrop: useCrop, scalingValueFloat: scalingValueFloat);
+        }
+        else
+        {
+          WGCCaptureSample.StartCaptureFromHwnd(handle);
+
+          //WGCCaptureSample.SetImageCaptureInfo(ref imageCaptureInfo);
+
+          WGCCaptureSample.getPreviewBitmap(useCrop, updateFullPreviewBitmap, updateCroppedPreviewBitmap);
+
+
+
+
+          //This is necessary for the preview windows to compute the correct offset later on...
+          //imageCaptureInfo.actual_crop_size_x = 2 * imageCaptureInfo.center_of_frame_x;
+          //imageCaptureInfo.actual_crop_size_y = 2 * imageCaptureInfo.center_of_frame_y;
+          imageCaptureInfo.actual_crop_size_x = WGCCaptureSample.getLastSizeX();
+          imageCaptureInfo.actual_crop_size_y = WGCCaptureSample.getLastSizeY();
+
+          return null;
+        }
+      }
 
 			return b;
 		}
 
-		public void ChangeAutoSplitSettingsToGameName(string gameName, string category)
+    public void updateFullPreviewBitmap(Bitmap b)
+    {
+      previewImage = (Bitmap)b.Clone();
+      DrawCaptureRectangleBitmap();
+    }
+    public void updateCroppedPreviewBitmap(Bitmap b)
+    {
+      var b_clone = (Bitmap)b.Clone();
+      croppedPreviewPictureBox.Image = b_clone;
+      lastFullCroppedCapture = b_clone;
+    }
+
+    public void ChangeAutoSplitSettingsToGameName(string gameName, string category)
 		{
 			gameName = removeInvalidXMLCharacters(gameName);
 			category = removeInvalidXMLCharacters(category);
@@ -800,8 +884,9 @@ namespace LiveSplit.UI.Components
 
 			selectionRectanglePreviewBox = new Rectangle(selectionTopLeft.X, selectionTopLeft.Y, selectionBottomRight.X - selectionTopLeft.X, selectionBottomRight.Y - selectionTopLeft.Y);
 
-			//Console.WriteLine("SELECTED ITEM: {0}", processListComboBox.SelectedItem.ToString());
-			DrawPreview();
+      WGCCaptureSample.StopCapture();
+      //Console.WriteLine("SELECTED ITEM: {0}", processListComboBox.SelectedItem.ToString());
+      DrawPreview();
 		}
 
 		private void CreateAutoSplitControls(LiveSplitState state)
@@ -879,7 +964,11 @@ namespace LiveSplit.UI.Components
 				copy.captureSizeY = previewPictureBox.Height;
 
 				//Show something in the preview
-				previewImage = CaptureImageFullPreview(ref copy);
+				var capture_full = CaptureImageFullPreview(ref copy);
+
+        if (capture_full != null)
+          previewImage = capture_full;
+
 				float crop_size_x = copy.actual_crop_size_x;
 				float crop_size_y = copy.actual_crop_size_y;
 
@@ -903,9 +992,18 @@ namespace LiveSplit.UI.Components
 				copy.crop_coordinate_top = selectionRectanglePreviewBox.Top * (crop_size_y / previewPictureBox.Height);
 				copy.crop_coordinate_bottom = selectionRectanglePreviewBox.Bottom * (crop_size_y / previewPictureBox.Height);
 
-				Bitmap full_cropped_capture = CaptureImageFullPreview(ref copy, useCrop: true);
-				croppedPreviewPictureBox.Image = full_cropped_capture;
-				lastFullCroppedCapture = full_cropped_capture;
+        if(WGCEnabled)
+          WGCCaptureSample.SetImageCaptureInfo(ref imageCaptureInfo);
+
+        var capture_cropped = CaptureImageFullPreview(ref copy, useCrop: true);
+        Bitmap full_cropped_capture = capture_cropped;
+
+        if(capture_cropped != null)
+        {
+          croppedPreviewPictureBox.Image = full_cropped_capture;
+          lastFullCroppedCapture = full_cropped_capture;
+        }
+				
 
 				copy.captureSizeX = captureSize.Width;
 				copy.captureSizeY = captureSize.Height;
@@ -950,10 +1048,24 @@ namespace LiveSplit.UI.Components
 			imageCaptureInfo.featureVectorResolutionY = featureVectorResolutionY;
 			imageCaptureInfo.captureSizeX = captureSize.Width;
 			imageCaptureInfo.captureSizeY = captureSize.Height;
-			imageCaptureInfo.cropOffsetX = cropOffsetX;
-			imageCaptureInfo.cropOffsetY = cropOffsetY;
 			imageCaptureInfo.captureAspectRatio = captureAspectRatioX / captureAspectRatioY;
-		}
+      imageCaptureInfo.preview_full_size_x = previewPictureBox.Width;
+      imageCaptureInfo.preview_full_size_y = previewPictureBox.Height;
+      imageCaptureInfo.cropped_preview_size_x = croppedPreviewPictureBox.Width;
+      imageCaptureInfo.cropped_preview_size_y = croppedPreviewPictureBox.Height;
+
+      imageCaptureInfo.cropOffsetX = cropOffsetX;
+      imageCaptureInfo.cropOffsetY = cropOffsetY;
+      imageCaptureInfo.feature_size_x = 300;
+      imageCaptureInfo.feature_size_y = 40;
+      imageCaptureInfo.feature_size_x2 = 50;
+      imageCaptureInfo.feature_size_y2 = 50;
+      imageCaptureInfo.cropOffsetX2 = -783;
+      imageCaptureInfo.cropOffsetY2 = 363;
+      imageCaptureInfo.cropOffsetX1 = -13;
+      imageCaptureInfo.cropOffsetY1 = -460;
+
+    }
 
 		private void previewPictureBox_MouseClick(object sender, MouseEventArgs e)
 		{
@@ -1017,7 +1129,7 @@ namespace LiveSplit.UI.Components
 				}
 				foreach (Process process in processListtmp)
 				{
-					if (!String.IsNullOrEmpty(process.MainWindowTitle))
+					if (!String.IsNullOrEmpty(process.MainWindowTitle) && DLLImportStuff.IsWindowValidForCapture(process.MainWindowHandle))
 					{
 						//Console.WriteLine("Process: {0} ID: {1} Window title: {2} HWND PTR {3}", process.ProcessName, process.Id, process.MainWindowTitle, process.MainWindowHandle);
 						processListComboBox.Items.Add(process.ProcessName + ": " + process.MainWindowTitle);
@@ -1150,7 +1262,8 @@ namespace LiveSplit.UI.Components
 				selectionBottomRight = new Point(x, y);
 			}
 
-			do_not_trigger_value_changed = true;
+
+      do_not_trigger_value_changed = true;
       numTopLeftRectY.Value = Math.Max(Math.Min(selectionTopLeft.Y, numTopLeftRectY.Maximum), 0);
 
 			do_not_trigger_value_changed = true;
@@ -1556,6 +1669,26 @@ namespace LiveSplit.UI.Components
     private void chkUseDetailedDetectionLog_CheckedChanged(object sender, EventArgs e)
     {
       DetailedDetectionLog = chkUseDetailedDetectionLog.Checked;
+
+
+    }
+
+    private void chkWGCEnabled_CheckedChanged(object sender, EventArgs e)
+    {
+      WGCEnabled = chkWGCEnabled.Checked;
+
+      // We stop the capture, and start it in the draw preview / capture image methods if necessary.
+      WGCCaptureSample.StopCapture();
+
+      DrawPreview();
+
+      //if (WGCEnabled)
+      //  WGCCaptureSample.LeakTest();
+    }
+
+    private void previewPictureBox_Click(object sender, EventArgs e)
+    {
+
     }
   }
 

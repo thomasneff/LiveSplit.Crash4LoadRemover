@@ -82,6 +82,8 @@ namespace LiveSplit.UI.Components
     private int framesSinceLastManualSplit = 0;
     private bool LastSplitSkip = false;
     private const float LOAD_PHASE_TOLERANCE_TIME = 0.3f; // waits 0.3s for the next load phase, otherwise discards it and returns to base state.
+    private const int LOAD1_BLACK_SCREEN_TOLERANCE_FRAMES = 5;
+    private int load1_tolerance_frames = 0;
     private Time load1_phase_start;
     private Time load1_phase_end; // This is used for the tolerance
 
@@ -284,7 +286,7 @@ namespace LiveSplit.UI.Components
 
               FeatureDetector.compareImageCaptureCrash4(capture, hsv_ranges_load_1, gradient_thresholds_load_1, achieved_hsv_ranges, achieved_gradient_thresholds, average_thresholded_gradients, 2);
 
-              isLoading = (achieved_hsv_ranges[0] > 0.04) && (achieved_gradient_thresholds[0] > 0.10) && (average_thresholded_gradients[1] > 50);
+              isLoading = (achieved_hsv_ranges[0] > 0.03) && (achieved_gradient_thresholds[0] > 0.09) && (average_thresholded_gradients[1] > 40);
               
               if(output_first_load_debug && settings.DetailedDetectionLog)
               {
@@ -300,8 +302,21 @@ namespace LiveSplit.UI.Components
 
               //Console.WriteLine("Loading 1: " + isLoading.ToString() + ", achieved Threshold 1: " + achieved_threshold.ToString() + ", achieved Threshold 2: " + achieved_threshold_2.ToString());
 
+              if (Crash4State == Crash4LoadState.LOAD1 && (Single.IsNaN(average_thresholded_gradients[1]) || (average_thresholded_gradients[1] < 20 && achieved_gradient_thresholds[0] <= 0.04 && achieved_hsv_ranges[0] <= 0.02)))
+              {
+                if (output_state_info && settings.DetailedDetectionLog)
+                  Console.WriteLine("Weird black screen thing during LOAD1, setting isLoading to true manually, tolerance frames: " + load1_tolerance_frames);
+                //settings.StoreCaptureImage(GameName, GameCategory, capture);
+
+                load1_tolerance_frames--;
+
+                if (load1_tolerance_frames > 0)
+                  isLoading = true;
+              }
+
               if (isLoading && Crash4State == Crash4LoadState.WAITING_FOR_LOAD1)
               {
+                load1_tolerance_frames = LOAD1_BLACK_SCREEN_TOLERANCE_FRAMES;
                 // Store current time - this is the start of our load!
                 Crash4State = Crash4LoadState.LOAD1;
                 load1_phase_start = timer.CurrentState.CurrentTime;
@@ -327,8 +342,9 @@ namespace LiveSplit.UI.Components
                 // We're waiting for LOAD2 until the tolerance. If LOAD1 detection happens in the mean time, we reset back to LOAD1.
 
                 // Check if the elapsed time is over our tolerance
+                load1_tolerance_frames = LOAD1_BLACK_SCREEN_TOLERANCE_FRAMES;
 
-                if(isLoading)
+                if (isLoading)
                 {
                   // Store current time - this is the start of our load - this might happen if orange letters are shortly before the real load screen.
                   Crash4State = Crash4LoadState.LOAD1;
@@ -349,6 +365,7 @@ namespace LiveSplit.UI.Components
             }
             else
             {
+              load1_tolerance_frames = LOAD1_BLACK_SCREEN_TOLERANCE_FRAMES;
               // Do HSV comparison on the raw image, without any features
               /*float achieved_threshold_1 = 0.0f;
               float achieved_threshold_2 = 0.0f;
