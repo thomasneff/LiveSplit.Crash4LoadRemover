@@ -636,7 +636,7 @@ namespace LiveSplit.UI.Components
 			//settingsNode.AppendChild(ToElement(document, "RemoveFadeins", chkRemoveFadeIns.Checked));
 			settingsNode.AppendChild(ToElement(document, "SaveDetectionLog", chkSaveDetectionLog.Checked));
       settingsNode.AppendChild(ToElement(document, "DetailedDetectionLog", chkUseDetailedDetectionLog.Checked));
-
+      settingsNode.AppendChild(ToElement(document, "WGCEnabled", chkWGCEnabled.Checked));
       //settingsNode.AppendChild(ToElement(document, "DatabaseFile", cmbDatabase.SelectedItem.ToString()));
 
       var splitsNode = document.CreateElement("AutoSplitGames");
@@ -781,6 +781,11 @@ namespace LiveSplit.UI.Components
         if (element["DetailedDetectionLog"] != null)
         {
           chkUseDetailedDetectionLog.Checked = Convert.ToBoolean(element["DetailedDetectionLog"].InnerText);
+        }
+
+        if (element["WGCEnabled"] != null)
+        {
+          chkWGCEnabled.Checked = Convert.ToBoolean(element["WGCEnabled"].InnerText);
         }
 
         if (element["DatabaseFile"] != null)
